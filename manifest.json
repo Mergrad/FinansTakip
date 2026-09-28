@@ -1,0 +1,55 @@
+{
+  "id": "/",
+  "name": "Ödeme Takip · 2026 Mobil Finansal Asistan",
+  "short_name": "Ödeme Takip",
+  "description": "Kira, fatura, kredi kartı, abonelik ve sigorta ödemelerini takip eden çevrimdışı finansal asistan.",
+  "lang": "tr",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "display_override": ["standalone", "minimal-ui", "browser"],
+  "orientation": "portrait",
+  "background_color": "#070b16",
+  "theme_color": "#070b16",
+  "categories": ["finance", "productivity", "lifestyle"],
+  "prefer_related_applications": false,
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23070b16' stroke-width='34' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='96' y='160' width='320' height='192' rx='40'/%3E%3Cpath d='M96 224h320'/%3E%3Ccircle cx='176' cy='296' r='22' fill='%23070b16' stroke='none'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23070b16' stroke-width='34' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='96' y='160' width='320' height='192' rx='40'/%3E%3Cpath d='M96 224h320'/%3E%3Ccircle cx='176' cy='296' r='22' fill='%23070b16' stroke='none'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' rx='112' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23070b16' stroke-width='34' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='96' y='160' width='320' height='192' rx='40'/%3E%3Cpath d='M96 224h320'/%3E%3Ccircle cx='176' cy='296' r='22' fill='%23070b16' stroke='none'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2322d3ee'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='512' height='512' fill='url(%23g)'/%3E%3Cg fill='none' stroke='%23070b16' stroke-width='34' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='128' y='176' width='256' height='160' rx='32'/%3E%3Cpath d='M128 224h256'/%3E%3Ccircle cx='192' cy='288' r='18' fill='%23070b16' stroke='none'/%3E%3C/g%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Yeni ödeme ekle",
+      "short_name": "Ekle",
+      "url": "/?action=add"
+    },
+    {
+      "name": "Özet",
+      "short_name": "Özet",
+      "url": "/?tab=sum"
+    }
+  ]
+}

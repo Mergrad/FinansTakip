@@ -1,0 +1,1087 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Ödeme Takip · 2026 Mobil Finansal Asistan</title>
+<meta name="description" content="Kira, fatura, kredi kartı, abonelik ve sigorta ödemelerini takip eden çevrimdışı PWA." />
+<meta name="theme-color" content="#070b16" />
+<meta name="color-scheme" content="dark" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Ödeme Takip" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="./manifest.json" />
+<link rel="apple-touch-icon" href="./manifest.json" />
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%2322d3ee'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23g)'/><g fill='none' stroke='%23070b16' stroke-width='34' stroke-linecap='round' stroke-linejoin='round'><rect x='96' y='160' width='320' height='192' rx='40'/><path d='M96 224h320'/><circle cx='176' cy='296' r='22' fill='%23070b16' stroke='none'/></g></svg>" />
+<style>
+@layer od-layout {
+  :where(.od-stack,.od-row,.od-row-top,.od-cluster,.od-grid,.od-field,.od-stat,.od-cell,.od-tile) > :where(*) { min-width: 0; }
+  .od-stack   { display: flex; flex-direction: column; gap: var(--od-gap, 8px); }
+  .od-row     { display: flex; align-items: center; gap: var(--od-gap, 8px); }
+  .od-row-top { display: flex; align-items: flex-start; gap: var(--od-gap, 8px); }
+  .od-cluster { display: flex; flex-wrap: wrap; align-items: center; gap: var(--od-gap, 8px); }
+  .od-fill    { flex: 1 1 0; min-width: 0; }
+  .od-fixed   { flex: none; }
+  .od-grid    { display: grid; gap: var(--od-gap, 12px); grid-template-columns: repeat(var(--od-cols, 3), minmax(0, 1fr)); }
+  .od-stat, .od-field, .od-cell { display: grid; gap: var(--od-gap, 2px); }
+  :where(.od-stat,.od-field,.od-cell) > :where(*) { display: block; }
+  .od-tile { display: grid; grid-template-rows: auto 1fr; }
+  :where(.od-tile) > :where(*) { display: block; }
+  .od-media { display: block; width: 100%; height: auto; aspect-ratio: var(--od-ratio, auto); }
+  .od-media-cover { object-fit: cover; }
+  .od-truncate { display: block; max-width: 100%; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  .od-clamp-2, .od-clamp-3 { display: -webkit-box; -webkit-box-orient: vertical; overflow: hidden; overflow-wrap: anywhere; }
+  .od-clamp-2 { -webkit-line-clamp: 2; }
+  .od-clamp-3 { -webkit-line-clamp: 3; }
+  .od-lines-2 { min-height: calc(2 * 1.4em); }
+  .od-nowrap  { white-space: nowrap; }
+  .od-keep    { word-break: keep-all; overflow-wrap: anywhere; }
+  .od-screen { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; height: 100%; }
+  .od-scroll { overflow-y: auto; overscroll-behavior: contain; min-height: 0; }
+  .od-rail { display: flex; gap: var(--od-gap, 8px); overflow-x: auto; scroll-snap-type: x proximity; scrollbar-width: none;
+             padding-inline: var(--od-rail-pad, 16px); scroll-padding-inline: var(--od-rail-pad, 16px); }
+  .od-rail::-webkit-scrollbar { display: none; }
+  :where(.od-rail) > :where(*) { flex: none; scroll-snap-align: start; }
+  :where(.od-rail) > :where(:last-child) { margin-inline-end: var(--od-rail-pad, 16px); }
+  .od-spacer { flex: none; visibility: hidden; pointer-events: none; }
+  .od-touch  { min-width: 44px; min-height: 44px; }
+}
+
+:root{
+  --bg:#070b16; --bg-2:#0b1224; --outer:#04060d;
+  --surface:rgba(255,255,255,.045); --surface-2:rgba(255,255,255,.075);
+  --stroke:rgba(255,255,255,.09); --stroke-2:rgba(255,255,255,.16);
+  --text:#eef1fb; --muted:#8b93ad; --faint:#5b6480;
+  --violet:#6366f1; --indigo:#7c5cff; --cyan:#22d3ee;
+  --green:#34d399; --amber:#fbbf24; --rose:#fb7185; --pink:#f472b6;
+  --grad:linear-gradient(135deg,#6366f1 0%,#22d3ee 100%);
+  --r-lg:24px; --r-md:18px; --r-sm:12px;
+  --shadow:0 18px 45px -18px rgba(0,0,0,.75);
+  --safe-b:env(safe-area-inset-bottom,0px); --safe-t:env(safe-area-inset-top,0px);
+  --nav-h:66px;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,"Helvetica Neue",system-ui,sans-serif;
+  background:var(--outer); color:var(--text); min-height:100dvh;
+  -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--cyan);outline-offset:2px;border-radius:8px}
+
+.app{
+  position:relative; width:100%; max-width:440px; margin:0 auto;
+  min-height:100dvh; overflow-x:hidden;
+  background:
+    radial-gradient(120% 55% at 8% -5%,rgba(99,102,241,.34),transparent 60%),
+    radial-gradient(90% 45% at 100% 0%,rgba(34,211,238,.20),transparent 55%),
+    linear-gradient(180deg,var(--bg-2),var(--bg) 38%,#04060d);
+  padding-bottom:calc(var(--nav-h) + var(--safe-b) + 24px);
+}
+.app::before{
+  content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(70% 30% at 50% 110%,rgba(99,102,241,.16),transparent 70%);
+}
+.view{position:relative;z-index:1}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:calc(20px + var(--safe-t)) 20px 8px}
+.brand{display:flex;align-items:center;gap:11px;min-width:0}
+.logo{width:42px;height:42px;border-radius:14px;display:grid;place-items:center;background:var(--grad);
+  box-shadow:0 10px 26px -8px rgba(99,102,241,.85);flex:0 0 auto}
+.logo svg{width:22px;height:22px}
+.brand h1{font-size:15px;margin:0;font-weight:700;letter-spacing:-.2px}
+.brand p{margin:2px 0 0;font-size:11px;color:var(--muted);font-weight:500}
+.top-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--stroke);background:var(--surface);
+  display:grid;place-items:center;color:var(--text);backdrop-filter:blur(14px);transition:transform .18s ease,background .18s ease}
+.icon-btn svg{width:19px;height:19px}
+.icon-btn:hover{background:var(--surface-2)}
+.icon-btn:active{transform:scale(.93)}
+.bell{position:relative}
+.bell::after{content:"";position:absolute;top:10px;right:11px;width:8px;height:8px;border-radius:50%;
+  background:var(--rose);border:2px solid #0b1224}
+.bell[data-empty="1"]::after{display:none}
+.install-btn{display:none;border:1px solid transparent;background:var(--grad);color:#08101f;font-weight:750;
+  font-size:12.5px;padding:0 14px;min-height:44px;border-radius:14px;align-items:center;gap:6px;
+  box-shadow:0 10px 24px -10px rgba(99,102,241,.9)}
+.install-btn.on{display:inline-flex}
+.install-btn:active{transform:scale(.95)}
+
+/* Month bar */
+.monthbar{display:flex;align-items:center;justify-content:space-between;margin:14px 20px 4px;padding:8px 10px;
+  border-radius:18px;background:var(--surface);border:1px solid var(--stroke);backdrop-filter:blur(16px)}
+.monthbar .m-btn{width:44px;height:44px;border-radius:12px;border:none;background:transparent;color:var(--muted);
+  display:grid;place-items:center;transition:background .18s ease,color .18s ease}
+.monthbar .m-btn:hover{background:var(--surface-2);color:var(--text)}
+.monthbar .m-btn:active{transform:scale(.94)}
+.monthbar .m-btn svg{width:20px;height:20px}
+.m-label{display:grid;justify-items:center;line-height:1.2;gap:2px}
+.m-label b{font-size:14px;letter-spacing:-.2px}
+.m-label span{font-size:10.5px;color:var(--muted);font-weight:500}
+
+/* Hero */
+.hero{margin:16px 20px 0;padding:22px;border-radius:var(--r-lg);position:relative;overflow:hidden;
+  background:linear-gradient(160deg,rgba(99,102,241,.26),rgba(34,211,238,.10) 60%,rgba(255,255,255,.03));
+  border:1px solid var(--stroke-2);box-shadow:var(--shadow)}
+.hero::after{content:"";position:absolute;top:-60px;right:-50px;width:170px;height:170px;border-radius:50%;
+  background:radial-gradient(circle,rgba(99,102,241,.55),transparent 70%);filter:blur(6px);pointer-events:none}
+.hero-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;position:relative}
+.eyebrow{font-size:11.5px;color:#c7c9ff;font-weight:650;letter-spacing:.5px;text-transform:uppercase}
+.total{font-size:34px;font-weight:800;letter-spacing:-1.4px;margin:8px 0 2px;line-height:1.05;
+  background:linear-gradient(120deg,#fff,#c7c9ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{font-size:12px;color:var(--muted);font-weight:500}
+.ring{width:78px;height:78px;position:relative;flex:0 0 auto}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:grid;place-items:center;font-size:15px;font-weight:800;letter-spacing:-.5px}
+.stats{display:flex;gap:10px;margin-top:18px;position:relative}
+.stat{flex:1 1 0;min-width:0;border-radius:16px;padding:12px;background:rgba(4,6,13,.42);
+  border:1px solid var(--stroke);backdrop-filter:blur(10px);display:grid;gap:5px}
+.stat .k{display:flex;align-items:center;gap:6px;font-size:10.5px;color:var(--muted);font-weight:600}
+.stat .k i{width:7px;height:7px;border-radius:2px;display:inline-block;flex:0 0 auto}
+.stat .v{font-size:14.5px;font-weight:750;letter-spacing:-.4px}
+
+/* Alert */
+.alert{margin:16px 20px 0;padding:14px 16px;border-radius:var(--r-md);display:flex;align-items:center;gap:13px;
+  background:linear-gradient(120deg,rgba(251,113,133,.20),rgba(251,113,133,.06));border:1px solid rgba(251,113,133,.38)}
+.alert[hidden]{display:none}
+.a-ico{width:38px;height:38px;border-radius:12px;background:rgba(251,113,133,.18);display:grid;place-items:center;
+  color:var(--rose);flex:0 0 auto}
+.a-ico svg{width:19px;height:19px}
+.alert .a-text{min-width:0}
+.alert b{display:block;font-size:13.5px;font-weight:700}
+.alert span{font-size:11.5px;color:#f6bcc4;font-weight:500}
+.go{margin-left:auto;border:none;background:var(--rose);color:#3a0d16;font-weight:750;font-size:12px;
+  padding:0 14px;min-height:40px;border-radius:12px;flex:0 0 auto;transition:transform .18s ease}
+.go:active{transform:scale(.95)}
+
+/* Section head */
+.sec-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:24px 20px 12px}
+.sec-head h2{font-size:16px;margin:0;font-weight:750;letter-spacing:-.3px}
+.count{font-size:11px;font-weight:700;color:#c7c9ff;background:rgba(99,102,241,.18);
+  border:1px solid rgba(99,102,241,.32);padding:4px 10px;border-radius:999px;white-space:nowrap}
+
+/* Chips */
+.filters{display:flex;gap:8px;padding:0 20px 4px;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.chip{flex:0 0 auto;border:1px solid var(--stroke);background:var(--surface);color:var(--muted);font-size:12.5px;
+  font-weight:650;padding:0 15px;min-height:40px;border-radius:999px;transition:.2s;white-space:nowrap;
+  backdrop-filter:blur(12px)}
+.chip:hover{color:var(--text)}
+.chip:active{transform:scale(.95)}
+.chip.active{background:var(--grad);color:#08101f;border-color:transparent;box-shadow:0 10px 24px -10px rgba(99,102,241,.9)}
+
+/* Payment list */
+.list{display:flex;flex-direction:column;gap:12px;padding:16px 20px 0}
+.pay{position:relative;display:flex;gap:13px;padding:15px 15px 15px 18px;border-radius:var(--r-md);
+  background:var(--surface);border:1px solid var(--stroke);backdrop-filter:blur(16px);overflow:hidden;
+  animation:rise .4s cubic-bezier(.2,.8,.2,1) both}
+.pay::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;
+  background:var(--accent,var(--indigo));opacity:.95}
+.pay.done{opacity:.62}
+.pay.done .amt{text-decoration:line-through;text-decoration-color:var(--faint)}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+.p-ico{width:44px;height:44px;border-radius:14px;flex:0 0 auto;display:grid;place-items:center;
+  background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent);
+  border:1px solid color-mix(in srgb,var(--accent) 32%,transparent)}
+.p-ico svg{width:21px;height:21px}
+.p-body{flex:1 1 0;min-width:0}
+.p-row1{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.p-cat{font-size:14.5px;font-weight:700;letter-spacing:-.2px}
+.amt{font-size:15px;font-weight:800;letter-spacing:-.4px}
+.p-row2{display:flex;align-items:center;gap:8px;margin-top:4px;flex-wrap:wrap}
+.due{font-size:11.5px;color:var(--muted);font-weight:550}
+.p-note{font-size:11.5px;color:var(--faint);margin-top:7px;line-height:1.4}
+.badge{font-size:10px;font-weight:750;padding:4px 9px;border-radius:999px;letter-spacing:.2px;border:1px solid transparent;white-space:nowrap}
+.badge.ok{color:var(--green);background:rgba(52,211,153,.13);border-color:rgba(52,211,153,.3)}
+.badge.wait{color:var(--amber);background:rgba(251,191,36,.13);border-color:rgba(251,191,36,.3)}
+.badge.late{color:var(--rose);background:rgba(251,113,133,.15);border-color:rgba(251,113,133,.35)}
+.p-actions{display:flex;gap:8px;margin-top:11px;flex-wrap:wrap}
+.p-actions button{border:1px solid var(--stroke-2);background:var(--surface-2);color:var(--text);font-size:11.5px;
+  font-weight:650;padding:0 12px;min-height:40px;border-radius:11px;transition:transform .16s ease,background .16s ease}
+.p-actions button:hover{background:rgba(255,255,255,.12)}
+.p-actions button:active{transform:scale(.95)}
+.p-actions .ghost{background:transparent;color:var(--muted);border-color:var(--stroke)}
+.p-actions .ghost:hover{color:var(--text)}
+.p-actions .primary{background:var(--grad);color:#08101f;border-color:transparent;font-weight:750}
+
+.empty{padding:44px 20px;text-align:center;color:var(--muted)}
+.empty .e-ico{width:64px;height:64px;border-radius:20px;margin:0 auto 14px;display:grid;place-items:center;
+  background:var(--surface);border:1px solid var(--stroke);color:var(--indigo)}
+.empty .e-ico svg{width:28px;height:28px}
+.empty b{display:block;font-size:14.5px;color:var(--text);margin-bottom:4px}
+.empty span{font-size:12.5px}
+
+/* FAB */
+.fab{position:fixed;right:calc(50% - 220px + 20px);bottom:calc(var(--nav-h) + var(--safe-b) + 16px);
+  width:56px;height:56px;border-radius:19px;border:none;background:var(--grad);color:#08101f;display:grid;
+  place-items:center;box-shadow:0 18px 34px -12px rgba(99,102,241,.95);transition:transform .2s ease;z-index:25}
+.fab[hidden]{display:none}
+.fab:active{transform:scale(.92) rotate(90deg)}
+.fab svg{width:26px;height:26px}
+@media (max-width:480px){.fab{right:20px}}
+
+/* Bottom nav */
+.navbar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:440px;z-index:30;
+  padding:8px 10px calc(8px + var(--safe-b));display:flex;align-items:stretch;justify-content:space-around;
+  background:linear-gradient(180deg,rgba(7,11,22,.6),rgba(7,11,22,.96) 45%);backdrop-filter:blur(22px);
+  border-top:1px solid var(--stroke)}
+.nav-item{border:none;background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:5px;font-size:10px;font-weight:650;min-height:48px;min-width:44px;padding:6px 8px;
+  border-radius:14px;transition:color .2s ease,transform .16s ease;flex:1 1 0}
+.nav-item svg{width:22px;height:22px}
+.nav-item.active{color:#c7c9ff}
+.nav-item.active svg{filter:drop-shadow(0 0 8px rgba(99,102,241,.9))}
+.nav-item:active{transform:scale(.94)}
+
+/* Cards / pages */
+.page{padding:16px 20px 0}
+.card{background:var(--surface);border:1px solid var(--stroke);border-radius:var(--r-md);padding:18px;
+  backdrop-filter:blur(16px)}
+.card + .card{margin-top:12px}
+.card h3{margin:0 0 14px;font-size:14px;font-weight:750;letter-spacing:-.2px}
+.kv{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--stroke)}
+.kv:first-of-type{border-top:none}
+.kv .k{font-size:12.5px;color:var(--muted);font-weight:550}
+.kv .v{font-size:13.5px;font-weight:750}
+.legend{display:grid;gap:10px;margin-top:16px}
+.legend .row{display:flex;align-items:center;gap:10px}
+.legend .dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.legend .nm{font-size:12.5px;font-weight:600;min-width:0;flex:1 1 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.legend .vl{font-size:12.5px;font-weight:700}
+.legend .pc{font-size:11px;color:var(--muted);width:44px;text-align:right}
+.bar-track{display:flex;height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid var(--stroke);margin-top:14px}
+.bar-track span{display:block;height:100%}
+.ratio{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.ratio b{display:block;font-size:13px;font-weight:750;margin-top:3px}
+.ratio .k{font-size:11px;color:var(--muted);font-weight:600}
+.donut-wrap{display:grid;place-items:center;position:relative;padding:6px 0 4px}
+.donut-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.donut-center b{font-size:20px;font-weight:800;letter-spacing:-.6px;display:block}
+.donut-center span{font-size:10.5px;color:var(--muted);font-weight:600}
+
+/* Year chart */
+.chart{display:flex;align-items:flex-end;gap:5px;height:190px;padding-top:8px}
+.ycol{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;
+  background:transparent;border:none;padding:0;border-radius:12px;transition:background .18s ease}
+.ycol:hover{background:rgba(255,255,255,.05)}
+.ytrack{flex:1 1 auto;width:100%;display:flex;align-items:flex-end;justify-content:center;min-height:0}
+.yfill{width:62%;max-width:18px;min-height:4px;border-radius:999px 999px 6px 6px;background:var(--grad);opacity:.85;transition:opacity .18s ease}
+.ycol.active .yfill{opacity:1;box-shadow:0 0 14px rgba(99,102,241,.8)}
+.ym{font-size:10px;color:var(--muted);font-weight:600}
+.ycol.active .ym{color:#c7c9ff}
+.yval{font-size:9.5px;color:var(--faint);font-weight:650;min-height:12px}
+.ycol.active .yval{color:var(--text)}
+
+/* Settings */
+.set-row{display:flex;align-items:center;gap:12px;padding:13px 0;border-top:1px solid var(--stroke)}
+.set-row:first-of-type{border-top:none}
+.set-row .txt{flex:1 1 0;min-width:0}
+.set-row .txt b{display:block;font-size:13.5px;font-weight:700}
+.set-row .txt span{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.btn{border:1px solid var(--stroke-2);background:var(--surface-2);color:var(--text);font-size:12px;font-weight:650;
+  padding:0 14px;min-height:42px;border-radius:12px;white-space:nowrap;transition:transform .16s ease,background .16s ease}
+.btn:hover{background:rgba(255,255,255,.12)}
+.btn:active{transform:scale(.95)}
+.btn.primary{background:var(--grad);color:#08101f;border-color:transparent;font-weight:750}
+.btn.danger{background:rgba(251,113,133,.14);border-color:rgba(251,113,133,.4);color:#ffd3da}
+.btn.grad-border{background:transparent;border:1px solid transparent;
+  background-image:linear-gradient(var(--bg-2),var(--bg-2)),var(--grad);background-origin:border-box;background-clip:padding-box,border-box}
+.hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:10px 0 0}
+.pill-ok{font-size:10.5px;font-weight:700;color:var(--green);background:rgba(52,211,153,.13);
+  border:1px solid rgba(52,211,153,.3);padding:4px 9px;border-radius:999px;white-space:nowrap}
+
+/* Sheet */
+.scrim{position:fixed;inset:0;background:rgba(3,5,11,.66);backdrop-filter:blur(3px);opacity:0;visibility:hidden;
+  transition:opacity .22s ease,visibility .22s ease;z-index:40}
+.scrim.on{opacity:1;visibility:visible}
+.sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:440px;z-index:50;
+  background:linear-gradient(180deg,#0d1425,#080d18);border:1px solid var(--stroke);border-bottom:none;
+  border-radius:26px 26px 0 0;padding:10px 20px calc(22px + var(--safe-b));max-height:88dvh;overflow-y:auto;
+  transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.sheet.on{transform:translate(-50%,0)}
+.sheet .grip{width:42px;height:4px;border-radius:999px;background:var(--stroke-2);margin:4px auto 16px}
+.sheet h3{margin:0 0 16px;font-size:16px;font-weight:750;letter-spacing:-.3px}
+.fl{display:grid;gap:7px;margin-bottom:14px}
+.fl > span{font-size:11.5px;font-weight:650;color:var(--muted)}
+.fl input,.fl select{width:100%;border:1px solid var(--stroke-2);background:rgba(4,6,13,.5);color:var(--text);
+  border-radius:13px;padding:0 13px;min-height:46px;font-size:14px;outline:none;appearance:none}
+.fl select{background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 19px) 21px,calc(100% - 14px) 21px;background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px}
+.fl input:focus,.fl select:focus{border-color:var(--violet);box-shadow:0 0 0 3px rgba(99,102,241,.18)}
+.fl input::placeholder{color:var(--faint)}
+.seg{display:flex;gap:8px}
+.seg label{flex:1 1 0;display:flex;align-items:center;justify-content:center;gap:7px;min-height:46px;
+  border:1px solid var(--stroke-2);border-radius:13px;font-size:12.5px;font-weight:650;color:var(--muted);cursor:pointer}
+.seg input{width:auto;min-height:0;margin:0;accent-color:var(--violet)}
+.seg label:has(input:checked){color:var(--text);border-color:var(--violet);background:rgba(99,102,241,.16)}
+.form-actions{display:flex;gap:10px;margin-top:6px}
+.form-actions .btn{flex:1 1 0;justify-content:center;min-height:50px;font-size:13.5px}
+.err{font-size:11.5px;color:var(--rose);margin-top:-6px;margin-bottom:10px}
+.err[hidden]{display:none}
+
+/* Notification items inside sheet */
+.notif{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--stroke)}
+.notif:first-of-type{border-top:none}
+.notif .dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:0 0 auto}
+.notif b{display:block;font-size:13px;font-weight:700}
+.notif span{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.notif .amt{margin-left:auto;font-size:13px;font-weight:750;white-space:nowrap}
+
+/* iOS install banner */
+.ios-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + var(--safe-b) + 12px);
+  width:calc(100% - 40px);max-width:400px;z-index:35;display:none;align-items:center;gap:12px;
+  padding:13px 14px;border-radius:18px;background:linear-gradient(160deg,rgba(99,102,241,.28),rgba(34,211,238,.12));
+  border:1px solid var(--stroke-2);box-shadow:var(--shadow);backdrop-filter:blur(18px)}
+.ios-banner.on{display:flex}
+.ios-banner .txt{flex:1 1 0;min-width:0}
+.ios-banner b{display:block;font-size:12.5px;font-weight:700}
+.ios-banner span{display:block;font-size:11px;color:#cfd4e8;margin-top:3px;line-height:1.4}
+.ios-banner .x{border:none;background:transparent;color:var(--muted);min-width:44px;min-height:44px;border-radius:12px;display:grid;place-items:center;flex:0 0 auto}
+
+/* Toast */
+.toast{position:fixed;left:50%;transform:translate(-50%,20px);bottom:calc(var(--nav-h) + var(--safe-b) + 24px);
+  z-index:60;background:rgba(13,20,37,.96);border:1px solid var(--stroke-2);color:var(--text);font-size:12.5px;
+  font-weight:600;padding:12px 18px;border-radius:14px;box-shadow:var(--shadow);opacity:0;visibility:hidden;
+  transition:opacity .22s ease,transform .22s ease,visibility .22s ease;max-width:calc(100% - 40px);text-align:center}
+.toast.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
+
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#08101f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/>
+        </svg>
+      </div>
+      <div>
+        <h1>Ödeme Takip</h1>
+        <p>2026 Mobil Finansal Asistan</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button class="install-btn" id="installBtn" type="button" aria-label="Uygulamayı yükle">
+        <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
+        Yükle
+      </button>
+      <button class="icon-btn bell" id="bellBtn" type="button" aria-label="Bildirimler">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 1 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="view" id="view"></main>
+</div>
+
+<button class="fab" id="fab" type="button" aria-label="Yeni ödeme ekle" hidden>
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+</button>
+
+<nav class="navbar" id="navbar" role="tablist" aria-label="Ana gezinme">
+  <button class="nav-item active" data-tab="pay" role="tab" aria-selected="true">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/></svg>
+    Ödemeler
+  </button>
+  <button class="nav-item" data-tab="sum" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20V10"/><path d="M18 20V4"/><path d="M6 20v-6"/></svg>
+    Özet
+  </button>
+  <button class="nav-item" data-tab="year" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
+    Yıllık
+  </button>
+  <button class="nav-item" data-tab="set" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
+    Ayarlar
+  </button>
+</nav>
+
+<div class="ios-banner" id="iosBanner" role="status">
+  <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#c7c9ff" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 16V4"/><path d="m8 8 4-4 4 4"/><rect x="4" y="14" width="16" height="7" rx="2"/></svg>
+  <div class="txt"><b>Ana Ekrana Ekle</b><span>Safari'de <b style="display:inline">Paylaş</b> simgesine dokun, ardından "Ana Ekrana Ekle" seç.</span></div>
+  <button class="x" id="iosClose" type="button" aria-label="Bandı kapat">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
+  </button>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<section class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Panel">
+  <div class="grip" aria-hidden="true"></div>
+  <div id="sheetBody"></div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var KEY = "odeme-takip-v1";
+  var TODAY_REF = new Date(2026, 2, 14); // tasarım referansındaki "bugün" (gecikme hesabı)
+  var VERSION = "1.0.0";
+  var MONTHS = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+  var MONTHS_SHORT = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
+
+  var CATS = {
+    kira:      { label:"Kira",        color:"#7c5cff", icon:'<path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M10 21v-6h4v6"/>' },
+    fatura:    { label:"Fatura",      color:"#22d3ee", icon:'<path d="M6 2h9l4 4v16l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 8h6M9 12h6M9 16h3"/>' },
+    kart:      { label:"Kredi Kartı", color:"#f472b6", icon:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/>' },
+    abonelik:  { label:"Abonelik",    color:"#34d399", icon:'<path d="M4 4h16v16H4z"/><path d="M4 9h16M8 13h4"/>' },
+    sigorta:   { label:"Sigorta",     color:"#fbbf24", icon:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6Z"/><path d="m9 12 2 2 4-4"/>' }
+  };
+  var STATUS = { done:{ t:"Ödendi", c:"ok" }, wait:{ t:"Bekliyor", c:"wait" }, late:{ t:"Gecikmiş", c:"late" } };
+  var CAT_ORDER = ["kira","fatura","kart","abonelik","sigorta"];
+
+  function seed(){
+    return [
+      { id:1,  cat:"kira",     amount:22000, due:"2026-03-05", status:"done", note:"Mart 2026 ev kirası transfer edildi", repeat:"once" },
+      { id:2,  cat:"fatura",   amount:890,   due:"2026-03-14", status:"done", note:"Elektrik faturası ödendi", repeat:"once" },
+      { id:3,  cat:"fatura",   amount:2150,  due:"2026-03-18", status:"wait", note:"Son ödeme günü yaklaşıyor", repeat:"once" },
+      { id:4,  cat:"fatura",   amount:420,   due:"2026-03-20", status:"wait", note:"Su faturası · sayaç okundu", repeat:"once" },
+      { id:5,  cat:"fatura",   amount:550,   due:"2026-03-08", status:"late", note:"Vadesi geçti! Acil ödeme bekliyor", repeat:"once" },
+      { id:6,  cat:"kart",     amount:14800, due:"2026-03-24", status:"wait", note:"Hesap kesim yapıldı", repeat:"once" },
+      { id:7,  cat:"abonelik", amount:490,   due:"2026-03-10", status:"done", note:"Netflix, Spotify, iCloud", repeat:"monthly" },
+      { id:8,  cat:"sigorta",  amount:2500,  due:"2026-03-28", status:"wait", note:"3. taksit", repeat:"once" },
+      { id:9,  cat:"kira",     amount:800,   due:"2026-03-12", status:"done", note:"Yöneticiye havale", repeat:"once" },
+      { id:10, cat:"sigorta",  amount:3800,  due:"2026-03-06", status:"late", note:"Gecikmede! Poliçe iptal riski", repeat:"once" }
+    ];
+  }
+
+  var payments = [], month = 2, year = 2026, filter = "all", tab = "pay", sheetKind = "";
+
+  function byId(id){ for (var i=0;i<payments.length;i++){ if (payments[i].id===id) return payments[i]; } return null; }
+  function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+  function tl(n){ return "₺" + Number(n).toLocaleString("tr-TR"); }
+  function pad(n){ return n<10 ? "0"+n : ""+n; }
+  function parseISO(s){ var a=s.split("-"); return new Date(+a[0], +a[1]-1, +a[2]); }
+  function dayLabel(s){ var d=parseISO(s); return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear(); }
+  function sameMonth(p){ var d=parseISO(p.due); return d.getMonth()===month && d.getFullYear()===year; }
+  function sum(arr,f){ return arr.reduce(function(a,p){ return a + (f?f(p):p.amount); },0); }
+
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify({ version:1, payments:payments })); } catch(e){} }
+  function load(){
+    var raw = null;
+    try { raw = localStorage.getItem(KEY); } catch(e){}
+    if (raw){
+      try {
+        var data = JSON.parse(raw);
+        if (data && Array.isArray(data.payments) && data.payments.length){ payments = data.payments; }
+      } catch(e){ payments = []; }
+    }
+    if (!payments.length){ payments = seed(); save(); }
+    applyOverdue();
+  }
+  function applyOverdue(){
+    var changed = false;
+    payments.forEach(function(p){
+      if (p.status==="wait" && parseISO(p.due) < TODAY_REF){ p.status = "late"; changed = true; }
+    });
+    if (changed) save();
+  }
+
+  /* ---------- Views ---------- */
+  function viewPayments(){
+    var inMonth = payments.filter(sameMonth);
+    var total = sum(inMonth);
+    var paid = sum(inMonth, function(p){ return p.status==="done" ? p.amount : 0; });
+    var wait = sum(inMonth, function(p){ return p.status==="wait" ? p.amount : 0; });
+    var late = inMonth.filter(function(p){ return p.status==="late"; });
+    var pct = total ? Math.round(paid/total*100) : 0;
+    var upcoming = inMonth.filter(function(p){ return p.status!=="done"; });
+
+    var shown = inMonth.filter(function(p){ return filter==="all" ? p.status!=="done" : p.status===filter; });
+    shown.sort(function(a,b){
+      var la = a.status==="late"?0:1, lb = b.status==="late"?0:1;
+      if (la!==lb) return la-lb;
+      return a.due < b.due ? -1 : a.due > b.due ? 1 : 0;
+    });
+
+    var html = "";
+    html += '<div class="monthbar">'
+      + '<button class="m-btn" id="prevMonth" type="button" aria-label="Önceki ay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>'
+      + '<div class="m-label"><b>' + MONTHS[month] + " " + year + '</b><span id="todayLabel"></span></div>'
+      + '<button class="m-btn" id="nextMonth" type="button" aria-label="Sonraki ay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>'
+      + '</div>';
+
+    html += '<section class="hero"><div class="hero-top"><div>'
+      + '<div class="eyebrow">Dönem Toplamı</div>'
+      + '<div class="total od-nowrap">' + tl(total) + '</div>'
+      + '<div class="sub"><span id="planCount">' + inMonth.length + '</span> planlanan ödeme</div>'
+      + '</div><div class="ring">'
+      + '<svg width="78" height="78" viewBox="0 0 78 78" aria-hidden="true">'
+      + '<defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#22d3ee"/></linearGradient></defs>'
+      + '<circle cx="39" cy="39" r="32" stroke="rgba(255,255,255,.10)" stroke-width="7" fill="none"/>'
+      + '<circle id="ringArc" cx="39" cy="39" r="32" stroke="url(#rg)" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="201" stroke-dashoffset="' + (201 - 201*pct/100).toFixed(1) + '"/></svg>'
+      + '<div class="pct">' + pct + '%</div>'
+      + '</div></div>'
+      + '<div class="stats">'
+      + '<div class="stat"><div class="k"><i style="background:#34d399"></i>Ödenen</div><div class="v od-nowrap">' + tl(paid) + '</div></div>'
+      + '<div class="stat"><div class="k"><i style="background:#fbbf24"></i>Bekleyen</div><div class="v od-nowrap">' + tl(wait) + '</div></div>'
+      + '<div class="stat"><div class="k"><i style="background:#fb7185"></i>Gecikmiş</div><div class="v">' + late.length + '</div></div>'
+      + '</div></section>';
+
+    if (late.length){
+      html += '<div class="alert"><div class="a-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg></div>'
+        + '<div class="a-text"><b>Gecikmiş Ödeme Var!</b><span>' + late.length + ' adet gecikmiş ödeme bekliyor</span></div>'
+        + '<button class="go" id="alertGo" type="button">Gör</button></div>';
+    }
+
+    html += '<div class="sec-head"><h2>Yaklaşan Ödemeler</h2><span class="count">' + upcoming.length + ' Ödeme</span></div>';
+    html += '<div class="filters" id="filters">'
+      + '<button class="chip' + (filter==="all"?" active":"") + '" data-filter="all" type="button">Tümü</button>'
+      + '<button class="chip' + (filter==="wait"?" active":"") + '" data-filter="wait" type="button">Bekleyen</button>'
+      + '<button class="chip' + (filter==="done"?" active":"") + '" data-filter="done" type="button">Ödendi</button>'
+      + '<button class="chip' + (filter==="late"?" active":"") + '" data-filter="late" type="button">Gecikmiş</button>'
+      + '</div>';
+
+    html += '<div class="list" id="list">';
+    if (!shown.length){
+      html += '<div class="empty"><div class="e-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg></div><b>Bu filtrede ödeme yok</b><span>Harika, her şey kontrol altında.</span></div>';
+    } else {
+      shown.forEach(function(p,i){
+        var c = CATS[p.cat] || CATS.fatura, s = STATUS[p.status];
+        html += '<article class="pay ' + (p.status==="done"?"done":"") + '" style="--accent:' + c.color + ';animation-delay:' + (i*45) + 'ms">'
+          + '<div class="p-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + c.icon + '</svg></div>'
+          + '<div class="p-body">'
+          + '<div class="p-row1"><span class="p-cat">' + esc(c.label) + '</span><span class="amt od-nowrap">' + tl(p.amount) + '</span></div>'
+          + '<div class="p-row2"><span class="due od-nowrap">Vade: ' + dayLabel(p.due) + '</span><span class="badge ' + s.c + '">' + s.t + '</span></div>'
+          + '<div class="p-note">' + esc(p.note) + '</div>'
+          + '<div class="p-actions">'
+          + (p.status==="done"
+              ? '<button class="ghost" data-act="undo" data-id="' + p.id + '" type="button">Geri Al</button>'
+              : '<button class="primary" data-act="pay" data-id="' + p.id + '" type="button">Ödendi Yap</button><button class="ghost" data-act="postpone" data-id="' + p.id + '" type="button">Ertele</button>')
+          + '<button class="ghost" data-act="del" data-id="' + p.id + '" type="button">Sil</button>'
+          + '</div></div></article>';
+      });
+    }
+    html += '</div>';
+    return html;
+  }
+
+  function viewSummary(){
+    var inMonth = payments.filter(sameMonth);
+    var total = sum(inMonth);
+    var paid = sum(inMonth, function(p){ return p.status==="done" ? p.amount : 0; });
+    var wait = sum(inMonth, function(p){ return p.status==="wait" ? p.amount : 0; });
+    var late = sum(inMonth, function(p){ return p.status==="late" ? p.amount : 0; });
+    var paidPct = total ? Math.round(paid/total*100) : 0;
+    var waitPct = total ? Math.round(wait/total*100) : 0;
+    var latePct = total ? Math.max(0, 100 - paidPct - waitPct) : 0;
+
+    var rows = CAT_ORDER.map(function(k){
+      return { k:k, label:CATS[k].label, color:CATS[k].color, value:sum(inMonth, function(p){ return p.cat===k ? p.amount : 0; }) };
+    }).filter(function(r){ return r.value > 0; }).sort(function(a,b){ return b.value - a.value; });
+    var top = rows[0];
+    var C = 2 * Math.PI * 60;
+    var acc = 0;
+    var segs = "";
+    rows.forEach(function(r){
+      var len = total ? C * (r.value/total) : 0;
+      segs += '<circle cx="90" cy="90" r="60" fill="none" stroke="' + r.color + '" stroke-width="20" stroke-dasharray="' + len.toFixed(2) + " " + (C-len).toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '"/>';
+      acc += len;
+    });
+
+    var html = '<div class="page">'
+      + '<div class="sec-head" style="margin-top:4px"><h2>Özet · ' + MONTHS[month] + " " + year + '</h2><span class="count">' + tl(total) + '</span></div>'
+      + '<div class="card"><h3>Kategori Dağılımı</h3>'
+      + '<div class="donut-wrap">'
+      + '<svg width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(-90deg)" aria-hidden="true">'
+      + '<circle cx="90" cy="90" r="60" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="20"/>' + segs
+      + '</svg>'
+      + '<div class="donut-center"><b class="od-nowrap">' + tl(total) + '</b><span>' + inMonth.length + ' ödeme</span></div>'
+      + '</div>'
+      + '<div class="legend">';
+    if (!rows.length){
+      html += '<div class="row"><span class="nm">Bu ay için kayıt yok</span></div>';
+    }
+    rows.forEach(function(r){
+      var p = total ? Math.round(r.value/total*100) : 0;
+      html += '<div class="row"><i class="dot" style="background:' + r.color + '"></i><span class="nm">' + esc(r.label) + '</span><span class="vl od-nowrap">' + tl(r.value) + '</span><span class="pc">' + p + '%</span></div>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="card"><h3>Ödenen / Bekleyen</h3>'
+      + '<div class="bar-track">'
+      + '<span style="width:' + paidPct + '%;background:#34d399"></span>'
+      + '<span style="width:' + waitPct + '%;background:#fbbf24"></span>'
+      + '<span style="width:' + latePct + '%;background:#fb7185"></span>'
+      + '</div>'
+      + '<div class="ratio">'
+      + '<div><span class="k">Ödenen</span><b class="od-nowrap">' + tl(paid) + '</b></div>'
+      + '<div><span class="k">Bekleyen</span><b class="od-nowrap">' + tl(wait) + '</b></div>'
+      + '<div><span class="k">Gecikmiş</span><b class="od-nowrap">' + tl(late) + '</b></div>'
+      + '</div></div>';
+
+    html += '<div class="card"><h3>En Yüksek Harcama</h3>'
+      + (top ? '<div class="kv"><span class="k">Kategori</span><span class="v">' + esc(top.label) + '</span></div>'
+              + '<div class="kv"><span class="k">Tutar</span><span class="v od-nowrap">' + tl(top.value) + '</span></div>'
+              + '<div class="kv"><span class="k">Payı</span><span class="v">' + (total ? Math.round(top.value/total*100) : 0) + '%</span></div>'
+            : '<div class="kv"><span class="k">Bu ay için kayıt yok</span></div>')
+      + '</div>';
+
+    html += '<div class="card"><h3>Ödeme Durumu</h3>'
+      + '<div class="kv"><span class="k">Tamamlanma oranı</span><span class="v">' + paidPct + '%</span></div>'
+      + '<div class="kv"><span class="k">Toplam kayıt</span><span class="v">' + inMonth.length + '</span></div>'
+      + '<div class="kv"><span class="k">Gecikmiş kayıt</span><span class="v">' + inMonth.filter(function(p){ return p.status==="late"; }).length + '</span></div>'
+      + '</div></div>';
+    return html;
+  }
+
+  function viewYear(){
+    var data = MONTHS_SHORT.map(function(m,i){
+      var items = payments.filter(function(p){ var d=parseISO(p.due); return d.getFullYear()===year && d.getMonth()===i; });
+      return { i:i, total: sum(items), count: items.length };
+    });
+    var max = Math.max.apply(null, data.map(function(d){ return d.total; }).concat([1]));
+    var yTotal = sum(data, function(d){ return d.total; });
+    var best = data.slice().sort(function(a,b){ return b.total-a.total; })[0];
+
+    var html = '<div class="page">'
+      + '<div class="sec-head" style="margin-top:4px"><h2>Yıllık · ' + year + '</h2><span class="count od-nowrap">' + tl(yTotal) + '</span></div>'
+      + '<div class="card"><h3>Aylık Toplam</h3><div class="chart">';
+    data.forEach(function(d){
+      var h = d.total ? Math.max(6, Math.round(d.total/max*100)) : 3;
+      html += '<button class="ycol' + (d.i===month ? " active" : "") + '" data-month="' + d.i + '" type="button" aria-label="' + MONTHS[d.i] + ' ' + year + '">'
+        + '<span class="yval">' + (d.total ? Math.round(d.total/1000) + "b" : "") + '</span>'
+        + '<span class="ytrack"><span class="yfill" style="height:' + h + '%"></span></span>'
+        + '<span class="ym">' + MONTHS_SHORT[d.i] + '</span>'
+        + '</button>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="card"><h3>Yıl Özeti</h3>'
+      + '<div class="kv"><span class="k">Yıllık toplam</span><span class="v od-nowrap">' + tl(yTotal) + '</span></div>'
+      + '<div class="kv"><span class="k">Kayıt sayısı</span><span class="v">' + payments.filter(function(p){ return parseISO(p.due).getFullYear()===year; }).length + '</span></div>'
+      + '<div class="kv"><span class="k">En yüksek ay</span><span class="v">' + (best && best.total ? MONTHS[best.i] + " · " + tl(best.total) : "—") + '</span></div>'
+      + '<div class="kv"><span class="k">Ortalama (dolu ay)</span><span class="v od-nowrap">' + tl(Math.round(yTotal/Math.max(1, data.filter(function(d){ return d.total>0; }).length))) + '</span></div>'
+      + '</div>'
+      + '<p class="hint">Aya dokunarak o ayın ödemelerine geçebilirsin.</p>'
+      + '</div>';
+    return html;
+  }
+
+  function notifPermissionLabel(){
+    if (!("Notification" in window)) return "Desteklenmiyor";
+    return { "granted":"Açık", "denied":"Reddedildi", "default":"Kapalı" }[Notification.permission] || "Kapalı";
+  }
+
+  function viewSettings(){
+    var notifOk = ("Notification" in window) && Notification.permission === "granted";
+    var html = '<div class="page">'
+      + '<div class="sec-head" style="margin-top:4px"><h2>Ayarlar</h2><span class="count">v' + VERSION + '</span></div>';
+
+    html += '<div class="card"><h3>Bildirimler</h3>'
+      + '<div class="set-row"><div class="txt"><b>Vade hatırlatması</b><span>Yaklaşan ve gecikmiş ödemeler için bildirim gönderir.</span></div>'
+      + (notifOk ? '<span class="pill-ok">Açık</span>' : '<button class="btn primary" id="notifBtn" type="button">İzni Aç</button>')
+      + '</div>'
+      + '<div class="kv"><span class="k">İzin durumu</span><span class="v">' + notifPermissionLabel() + '</span></div>'
+      + '</div>';
+
+    html += '<div class="card"><h3>Veri</h3>'
+      + '<div class="set-row"><div class="txt"><b>JSON dışa aktar</b><span>Tüm ödemeleri yedek dosyası olarak indir.</span></div><button class="btn" id="exportBtn" type="button">Dışa Aktar</button></div>'
+      + '<div class="set-row"><div class="txt"><b>JSON içe aktar</b><span>Yedek dosyasından verileri geri yükle.</span></div><button class="btn" id="importBtn" type="button">İçe Aktar</button></div>'
+      + '<input type="file" id="importFile" accept="application/json,.json" hidden />'
+      + '<div class="set-row"><div class="txt"><b>Tüm veriyi sıfırla</b><span>Kayıtları siler ve örnek veriye döner.</span></div><button class="btn danger" id="resetBtn" type="button">Sıfırla</button></div>'
+      + '</div>';
+
+    html += '<div class="card"><h3>Uygulama</h3>'
+      + '<div class="set-row"><div class="txt"><b>Ana ekrana ekle</b><span>Uygulamayı çevrimdışı kullan.</span></div>'
+      + '<button class="btn grad-border" id="settingsInstall" type="button">Yükle</button></div>'
+      + '<div class="kv"><span class="k">Sürüm</span><span class="v">' + VERSION + '</span></div>'
+      + '<div class="kv"><span class="k">Kayıt sayısı</span><span class="v">' + payments.length + '</span></div>'
+      + '<div class="kv"><span class="k">Depolama</span><span class="v">localStorage</span></div>'
+      + '</div>'
+      + '<p class="hint">iPhone/iPad: Safari\'de Paylaş simgesine dokun, ardından "Ana Ekrana Ekle" seç.</p>'
+      + '</div>';
+    return html;
+  }
+
+  /* ---------- Render ---------- */
+  var view = document.getElementById("view");
+  var fab = document.getElementById("fab");
+  var bell = document.getElementById("bellBtn");
+
+  function nowLabel(){
+    try {
+      return new Intl.DateTimeFormat("tr-TR", { day:"numeric", month:"long", year:"numeric" }).format(new Date()) + " · Bugün";
+    } catch(e){ return ""; }
+  }
+
+  function render(){
+    if (tab==="pay") view.innerHTML = viewPayments();
+    else if (tab==="sum") view.innerHTML = viewSummary();
+    else if (tab==="year") view.innerHTML = viewYear();
+    else view.innerHTML = viewSettings();
+
+    var tl2 = document.getElementById("todayLabel");
+    if (tl2) tl2.textContent = nowLabel();
+
+    Array.prototype.forEach.call(document.querySelectorAll(".nav-item"), function(n){
+      var on = n.getAttribute("data-tab") === tab;
+      n.classList.toggle("active", on);
+      n.setAttribute("aria-selected", on ? "true" : "false");
+    });
+    fab.hidden = tab !== "pay";
+    bell.setAttribute("data-empty", payments.some(function(p){ return p.status!=="done"; }) ? "0" : "1");
+  }
+
+  function toast(msg){
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.classList.add("on");
+    clearTimeout(toast._t);
+    toast._t = setTimeout(function(){ t.classList.remove("on"); }, 2200);
+  }
+
+  /* ---------- Sheet ---------- */
+  var scrim = document.getElementById("scrim");
+  var sheet = document.getElementById("sheet");
+  var sheetBody = document.getElementById("sheetBody");
+
+  function todayISO(){
+    var d = new Date(TODAY_REF);
+    return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+  }
+
+  function openSheet(kind){
+    sheetKind = kind;
+    if (kind === "add"){
+      var opts = CAT_ORDER.map(function(k){ return '<option value="' + k + '">' + CATS[k].label + '</option>'; }).join("");
+      sheetBody.innerHTML = '<h3>Yeni Ödeme</h3>'
+        + '<form id="addForm" novalidate>'
+        + '<label class="fl"><span>Kategori</span><select name="cat" required>' + opts + '</select></label>'
+        + '<label class="fl"><span>Tutar (₺)</span><input name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" required /></label>'
+        + '<label class="fl"><span>Vade</span><input name="due" type="date" value="' + todayISO() + '" required /></label>'
+        + '<label class="fl"><span>Not</span><input name="note" type="text" maxlength="80" placeholder="Örn. Mart 2026 elektrik" /></label>'
+        + '<div class="fl"><span>Tekrar</span><div class="seg">'
+        + '<label><input type="radio" name="repeat" value="once" checked /> Tek sefer</label>'
+        + '<label><input type="radio" name="repeat" value="monthly" /> Aylık</label>'
+        + '</div></div>'
+        + '<p class="err" id="formErr" hidden></p>'
+        + '<div class="form-actions"><button class="btn ghost" type="button" data-sheet-close>Vazgeç</button><button class="btn primary" type="submit">Kaydet</button></div>'
+        + '</form>';
+    } else {
+      sheetBody.innerHTML = '<h3>Bildirimler</h3>' + notifListHTML();
+    }
+    scrim.classList.add("on");
+    sheet.classList.add("on");
+    if (kind === "add"){
+      var first = sheetBody.querySelector("select");
+      if (first) setTimeout(function(){ first.focus(); }, 250);
+    } else {
+      var closeBtn = sheetBody.querySelector("[data-sheet-close]");
+      if (closeBtn) closeBtn.focus();
+    }
+  }
+  function closeSheet(){
+    scrim.classList.remove("on");
+    sheet.classList.remove("on");
+    sheetKind = "";
+  }
+
+  function notifListHTML(){
+    var items = payments.filter(function(p){ return p.status!=="done"; }).sort(function(a,b){ return a.due < b.due ? -1 : 1; });
+    if (!items.length) return '<p class="hint">Şu an bekleyen ödeme yok. Her şey kontrol altında.</p>';
+    var html = "";
+    items.forEach(function(p){
+      var c = CATS[p.cat] || CATS.fatura, s = STATUS[p.status];
+      html += '<div class="notif"><i class="dot" style="background:' + c.color + '"></i>'
+        + '<div><b>' + esc(c.label) + ' · ' + s.t + '</b><span>' + dayLabel(p.due) + ' · ' + esc(p.note) + '</span></div>'
+        + '<span class="amt od-nowrap">' + tl(p.amount) + '</span></div>';
+    });
+    html += '<div class="form-actions"><button class="btn" type="button" data-sheet-close>Kapat</button></div>';
+    return html;
+  }
+
+  /* ---------- Actions ---------- */
+  function nextMonthDue(iso){
+    var d = parseISO(iso), m = d.getMonth()+1, y = d.getFullYear();
+    if (m > 11){ m = 0; y += 1; }
+    var last = new Date(y, m+1, 0).getDate();
+    return y + "-" + pad(m+1) + "-" + pad(Math.min(d.getDate(), last));
+  }
+
+  function handleAction(act, id){
+    var p = byId(id);
+    if (!p) return;
+    if (act === "pay"){
+      p.status = "done"; p.note = "Ödeme tamamlandı"; save(); render(); toast("Ödendi olarak işaretlendi");
+      if (p.repeat === "monthly"){
+        var due = nextMonthDue(p.due);
+        var dup = payments.some(function(x){ return x.cat===p.cat && x.due===due && x.amount===p.amount; });
+        if (!dup){
+          payments.push({ id:Date.now(), cat:p.cat, amount:p.amount, due:due, status:"wait", note:"Aylık tekrar · otomatik oluşturuldu", repeat:"monthly" });
+          save();
+        }
+      }
+    } else if (act === "undo"){
+      p.status = "wait"; p.note = "Ödeme bekliyor";
+      if (parseISO(p.due) < TODAY_REF) p.status = "late";
+      save(); render(); toast("Geri alındı");
+    } else if (act === "postpone"){
+      var d = parseISO(p.due); d.setDate(d.getDate()+7);
+      p.due = d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
+      if (p.status === "late" && d >= TODAY_REF) p.status = "wait";
+      save(); render(); toast("Vade 7 gün ertelendi");
+    } else if (act === "del"){
+      payments = payments.filter(function(x){ return x.id !== id; });
+      save(); render(); toast("Ödeme silindi");
+    }
+  }
+
+  /* ---------- Events ---------- */
+  view.addEventListener("click", function(e){
+    var btn = e.target.closest("button"); if (!btn) return;
+    if (btn.id === "prevMonth"){
+      month -= 1; if (month < 0){ month = 11; year -= 1; }
+      render(); return;
+    }
+    if (btn.id === "nextMonth"){
+      month += 1; if (month > 11){ month = 0; year += 1; }
+      render(); return;
+    }
+    if (btn.id === "alertGo"){
+      filter = "late"; render(); toast("Gecikmiş ödemeler gösteriliyor"); return;
+    }
+    var chip = btn.closest(".chip");
+    if (chip){ filter = chip.getAttribute("data-filter"); render(); return; }
+    var col = btn.closest(".ycol");
+    if (col){ month = +col.getAttribute("data-month"); tab = "pay"; render(); return; }
+    if (btn.id === "notifBtn"){
+      requestNotif(); return;
+    }
+    if (btn.id === "exportBtn"){
+      exportJSON(); return;
+    }
+    if (btn.id === "importBtn"){
+      document.getElementById("importFile").click(); return;
+    }
+    if (btn.id === "resetBtn"){
+      if (confirm("Tüm ödemeler silinip örnek veriye dönülecek. Emin misin?")){
+        payments = seed(); save(); filter = "all"; render(); toast("Veriler sıfırlandı");
+      }
+      return;
+    }
+    if (btn.id === "settingsInstall"){ doInstall(); return; }
+    if (btn.hasAttribute("data-act")){
+      handleAction(btn.getAttribute("data-act"), +btn.getAttribute("data-id"));
+    }
+  });
+
+  view.addEventListener("change", function(e){
+    if (e.target && e.target.id === "importFile"){
+      var f = e.target.files && e.target.files[0];
+      if (f) importJSON(f);
+      e.target.value = "";
+    }
+  });
+
+  document.getElementById("navbar").addEventListener("click", function(e){
+    var b = e.target.closest(".nav-item"); if (!b) return;
+    tab = b.getAttribute("data-tab");
+    render();
+  });
+
+  document.getElementById("fab").addEventListener("click", function(){ openSheet("add"); });
+  bell.addEventListener("click", function(){ openSheet("notifs"); });
+
+  scrim.addEventListener("click", closeSheet);
+
+  document.addEventListener("keydown", function(e){ if (e.key === "Escape" && sheetKind) closeSheet(); });
+
+  sheetBody.addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    if (b.hasAttribute("data-sheet-close")) closeSheet();
+  });
+
+  sheetBody.addEventListener("submit", function(e){
+    if (e.target && e.target.id === "addForm"){
+      e.preventDefault();
+      submitAdd(e.target);
+    }
+  });
+
+  function submitAdd(form){
+    var err = document.getElementById("formErr");
+    var fd = new FormData(form);
+    var cat = String(fd.get("cat") || "");
+    var amount = parseInt(fd.get("amount"), 10);
+    var due = String(fd.get("due") || "");
+    var note = String(fd.get("note") || "").trim();
+    var repeat = String(fd.get("repeat") || "once");
+
+    if (!CATS[cat] || !amount || amount <= 0 || !due){
+      err.textContent = "Kategori, geçerli bir tutar ve vade girmelisin.";
+      err.hidden = false;
+      return;
+    }
+    err.hidden = true;
+    var status = parseISO(due) < TODAY_REF ? "late" : "wait";
+    payments.push({ id:Date.now(), cat:cat, amount:amount, due:due, status:status, note:note || "Yeni ödeme", repeat:repeat });
+    save();
+    closeSheet();
+    var d = parseISO(due);
+    month = d.getMonth(); year = d.getFullYear(); filter = "all"; tab = "pay";
+    render();
+    toast("Ödeme eklendi");
+  }
+
+  /* ---------- Data I/O ---------- */
+  function exportJSON(){
+    try {
+      var blob = new Blob([JSON.stringify({ version:1, exportedAt:new Date().toISOString(), payments:payments }, null, 2)], { type:"application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = "odeme-takip-yedek.json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+      toast("Yedek indirildi");
+    } catch(e){ toast("Dışa aktarma başarısız"); }
+  }
+
+  function importJSON(file){
+    var r = new FileReader();
+    r.onload = function(){
+      try {
+        var data = JSON.parse(String(r.result));
+        var list = data && Array.isArray(data.payments) ? data.payments : (Array.isArray(data) ? data : null);
+        if (!list) throw new Error("bad");
+        payments = list.filter(function(p){ return p && CATS[p.cat] && p.due && p.amount; }).map(function(p,i){
+          return { id:p.id || Date.now()+i, cat:p.cat, amount:+p.amount, due:p.due,
+                   status:(p.status==="done"||p.status==="wait"||p.status==="late")?p.status:"wait",
+                   note:p.note || "", repeat:p.repeat==="monthly"?"monthly":"once" };
+        });
+        if (!payments.length) throw new Error("empty");
+        applyOverdue(); save(); render(); toast("Veriler içe aktarıldı");
+      } catch(e){ toast("Geçersiz yedek dosyası"); }
+    };
+    r.onerror = function(){ toast("Dosya okunamadı"); };
+    r.readAsText(file);
+  }
+
+  /* ---------- Notifications ---------- */
+  function requestNotif(){
+    if (!("Notification" in window)){ toast("Bu tarayıcı bildirimi desteklemiyor"); return; }
+    Notification.requestPermission().then(function(perm){
+      if (perm === "granted"){ toast("Bildirimler açıldı"); checkReminders(true); }
+      else { toast("Bildirim izni verilmedi"); }
+      render();
+    });
+  }
+
+  function checkReminders(force){
+    if (!("Notification" in window) || Notification.permission !== "granted") return;
+    var soon = payments.filter(function(p){
+      if (p.status === "done") return false;
+      var diff = (parseISO(p.due) - TODAY_REF) / 86400000;
+      return diff <= 3;
+    });
+    if (!soon.length) return;
+    var dayKey = "odeme-takip-notified";
+    var last = null;
+    try { last = localStorage.getItem(dayKey); } catch(e){}
+    var stamp = new Date().toDateString();
+    if (!force && last === stamp) return;
+    try { localStorage.setItem(dayKey, stamp); } catch(e){}
+    try {
+      new Notification("Ödeme Takip", {
+        body: soon.length + " ödeme için vade yaklaşıyor veya gecikmiş.",
+        lang: "tr", tag: "odeme-takip"
+      });
+    } catch(e){}
+  }
+
+  /* ---------- PWA ---------- */
+  var deferredPrompt = null;
+  var installBtn = document.getElementById("installBtn");
+
+  window.addEventListener("beforeinstallprompt", function(e){
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.classList.add("on");
+  });
+  window.addEventListener("appinstalled", function(){
+    deferredPrompt = null;
+    installBtn.classList.remove("on");
+    toast("Uygulama yüklendi");
+  });
+
+  function doInstall(){
+    if (deferredPrompt){
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then(function(){ deferredPrompt = null; installBtn.classList.remove("on"); });
+    } else {
+      toast("Tarayıcı menüsünden 'Uygulamayı yükle' seçeneğini kullan");
+    }
+  }
+  installBtn.addEventListener("click", doInstall);
+
+  function isStandalone(){
+    return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone === true;
+  }
+  function isIOS(){
+    var ua = window.navigator.userAgent || "";
+    return /iPad|iPhone|iPod/.test(ua) || (ua.indexOf("Macintosh") > -1 && "ontouchend" in document);
+  }
+  (function iosHint(){
+    var dismissed = false;
+    try { dismissed = localStorage.getItem("odeme-takip-ios-hint") === "1"; } catch(e){}
+    if (isIOS() && !isStandalone() && !dismissed){
+      document.getElementById("iosBanner").classList.add("on");
+    }
+  })();
+  document.getElementById("iosClose").addEventListener("click", function(){
+    document.getElementById("iosBanner").classList.remove("on");
+    try { localStorage.setItem("odeme-takip-ios-hint", "1"); } catch(e){}
+  });
+
+  if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("./sw.js").catch(function(){});
+    });
+  }
+
+  /* ---------- Runtime-generated apple touch icon ---------- */
+  (function touchIcon(){
+    try {
+      var c = document.createElement("canvas"); c.width = c.height = 180;
+      var x = c.getContext("2d");
+      var g = x.createLinearGradient(0, 0, 180, 180);
+      g.addColorStop(0, "#6366f1"); g.addColorStop(1, "#22d3ee");
+      function rr(cx, px, py, w, h, r){
+        cx.beginPath();
+        cx.moveTo(px+r, py);
+        cx.arcTo(px+w, py, px+w, py+h, r);
+        cx.arcTo(px+w, py+h, px, py+h, r);
+        cx.arcTo(px, py+h, px, py, r);
+        cx.arcTo(px, py, px+w, py, r);
+        cx.closePath();
+      }
+      x.fillStyle = g; rr(x, 0, 0, 180, 180, 40); x.fill();
+      x.strokeStyle = "#070b16"; x.lineWidth = 13; x.lineCap = "round"; x.lineJoin = "round";
+      rr(x, 34, 56, 112, 68, 14); x.stroke();
+      x.beginPath(); x.moveTo(34, 80); x.lineTo(146, 80); x.stroke();
+      x.fillStyle = "#070b16"; x.beginPath(); x.arc(62, 104, 8, 0, 7); x.fill();
+      var link = document.querySelector('link[rel="apple-touch-icon"]');
+      if (link) link.setAttribute("href", c.toDataURL("image/png"));
+    } catch(e){}
+  })();
+
+  /* ---------- Init ---------- */
+  load();
+  render();
+  checkReminders(false);
+})();
+</script>
+</body>
+</html>
