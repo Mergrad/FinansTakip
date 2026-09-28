@@ -1,4 +1,4 @@
-const CACHE = "odeme-takip-v1";
+const CACHE = "odeme-takip-v2";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
@@ -30,6 +30,7 @@ self.addEventListener("fetch", (e) => {
     return;
   }
   if (url.origin !== self.location.origin) return;
+  if (!url.pathname.startsWith(new URL(self.registration.scope).pathname)) return;
 
   const isDoc = req.mode === "navigate" || req.destination === "document";
 
@@ -54,7 +55,17 @@ self.addEventListener("fetch", (e) => {
           return res;
         })
         .catch(() =>
-          caches.match("./index.html").then((fb) => fb || caches.match("./") || Response.error())
+          caches
+            .match("./index.html")
+            .then((fb) => fb || caches.match("./"))
+            .then(
+              (fb) =>
+                fb ||
+                new Response("Çevrimdışı", {
+                  status: 503,
+                  headers: { "Content-Type": "text/plain; charset=utf-8" }
+                })
+            )
         );
     })
   );
