@@ -12,8 +12,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <meta name="apple-mobile-web-app-title" content="Ödeme Takip" />
 <meta name="format-detection" content="telephone=no" />
-<link rel="manifest" href="./manifest.json" />
-<link rel="apple-touch-icon" href="./manifest.json" />
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%2322d3ee'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23g)'/><g fill='none' stroke='%23070b16' stroke-width='34' stroke-linecap='round' stroke-linejoin='round'><rect x='96' y='160' width='320' height='192' rx='40'/><path d='M96 224h320'/><circle cx='176' cy='296' r='22' fill='%23070b16' stroke='none'/></g></svg>" />
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='g' x1='0' y1='0' x2='1' y2='1'><stop offset='0' stop-color='%236366f1'/><stop offset='1' stop-color='%2322d3ee'/></linearGradient></defs><rect width='512' height='512' rx='112' fill='url(%23g)'/><g fill='none' stroke='%23070b16' stroke-width='34' stroke-linecap='round' stroke-linejoin='round'><rect x='96' y='160' width='320' height='192' rx='40'/><path d='M96 224h320'/><circle cx='176' cy='296' r='22' fill='%23070b16' stroke='none'/></g></svg>" />
 <style>
 @layer od-layout {
@@ -1047,7 +1047,9 @@ button{cursor:pointer}
 
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
     window.addEventListener("load", function(){
-      navigator.serviceWorker.register("./sw.js").catch(function(){});
+      /*navigator.serviceWorker.register("./sw.js").catch(function(){}); */
+      
+      navigator.serviceWorker.register("./sw.js", { scope: "./" });
     });
   }
 
