@@ -1,4 +1,4 @@
-const CACHE = "odeme-takip-v2";
+const CACHE = "odeme-takip-v3";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
