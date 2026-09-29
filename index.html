@@ -114,7 +114,8 @@ button{cursor:pointer}
 
 /* Month bar */
 .monthbar{display:flex;align-items:center;justify-content:space-between;margin:14px 20px 4px;padding:8px 10px;
-  border-radius:18px;background:var(--surface);border:1px solid var(--stroke);backdrop-filter:blur(16px)}
+  border-radius:18px;background:var(--surface);border:1px solid var(--stroke);backdrop-filter:blur(16px);
+  touch-action:pan-y;user-select:none}
 .monthbar .m-btn{width:44px;height:44px;border-radius:12px;border:none;background:transparent;color:var(--muted);
   display:grid;place-items:center;transition:background .18s ease,color .18s ease}
 .monthbar .m-btn:hover{background:var(--surface-2);color:var(--text)}
@@ -123,6 +124,7 @@ button{cursor:pointer}
 .m-label{display:grid;justify-items:center;line-height:1.2;gap:2px}
 .m-label b{font-size:14px;letter-spacing:-.2px}
 .m-label span{font-size:10.5px;color:var(--muted);font-weight:500}
+.swipe-hint{font-size:9.5px;color:var(--faint);text-align:center;margin:6px 20px 0;font-weight:500}
 
 /* Hero */
 .hero{margin:16px 20px 0;padding:22px;border-radius:var(--r-lg);position:relative;overflow:hidden;
@@ -179,7 +181,7 @@ button{cursor:pointer}
 .list{display:flex;flex-direction:column;gap:12px;padding:16px 20px 0}
 .pay{position:relative;display:flex;gap:13px;padding:15px 15px 15px 18px;border-radius:var(--r-md);
   background:var(--surface);border:1px solid var(--stroke);backdrop-filter:blur(16px);overflow:hidden;
-  animation:rise .4s cubic-bezier(.2,.8,.2,1) both}
+  animation:rise .4s cubic-bezier(.2,.8,.2,1) both;cursor:pointer}
 .pay::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:3px;border-radius:3px;
   background:var(--accent,var(--indigo));opacity:.95}
 .pay.done{opacity:.62}
@@ -248,21 +250,27 @@ button{cursor:pointer}
 .kv:first-of-type{border-top:none}
 .kv .k{font-size:12.5px;color:var(--muted);font-weight:550}
 .kv .v{font-size:13.5px;font-weight:750}
-.legend{display:grid;gap:10px;margin-top:16px}
-.legend .row{display:flex;align-items:center;gap:10px}
-.legend .dot{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
-.legend .nm{font-size:12.5px;font-weight:600;min-width:0;flex:1 1 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.legend .vl{font-size:12.5px;font-weight:700}
-.legend .pc{font-size:11px;color:var(--muted);width:44px;text-align:right}
-.bar-track{display:flex;height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid var(--stroke);margin-top:14px}
-.bar-track span{display:block;height:100%}
-.ratio{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
-.ratio b{display:block;font-size:13px;font-weight:750;margin-top:3px}
-.ratio .k{font-size:11px;color:var(--muted);font-weight:600}
+
+/* Category chart (improved) */
+.cat-row{padding:11px 0;border-top:1px solid var(--stroke)}
+.cat-row:first-of-type{border-top:none}
+.cat-top{display:flex;align-items:center;gap:9px}
+.cat-top .dot{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
+.cat-top .nm{font-size:13px;font-weight:650;flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-top .vl{font-size:13px;font-weight:750}
+.cat-top .pc{font-size:11.5px;color:var(--muted);width:42px;text-align:right;font-weight:650}
+.cat-bar{height:7px;border-radius:999px;background:rgba(255,255,255,.06);margin-top:9px;overflow:hidden}
+.cat-bar span{display:block;height:100%;border-radius:999px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
 .donut-wrap{display:grid;place-items:center;position:relative;padding:6px 0 4px}
 .donut-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
 .donut-center b{font-size:20px;font-weight:800;letter-spacing:-.6px;display:block}
 .donut-center span{font-size:10.5px;color:var(--muted);font-weight:600}
+
+.ratio{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
+.ratio b{display:block;font-size:13px;font-weight:750;margin-top:3px}
+.ratio .k{font-size:11px;color:var(--muted);font-weight:600}
+.bar-track{display:flex;height:12px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,.06);border:1px solid var(--stroke);margin-top:14px}
+.bar-track span{display:block;height:100%}
 
 /* Year chart */
 .chart{display:flex;align-items:flex-end;gap:5px;height:190px;padding-top:8px}
@@ -283,6 +291,14 @@ button{cursor:pointer}
 .set-row .txt{flex:1 1 0;min-width:0}
 .set-row .txt b{display:block;font-size:13.5px;font-weight:700}
 .set-row .txt span{display:block;font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.4}
+.set-col{display:grid;gap:8px;padding:13px 0;border-top:1px solid var(--stroke)}
+.set-col:first-of-type{border-top:none}
+.set-col > .lbl{font-size:12px;font-weight:650;color:var(--muted)}
+.seg-set{display:flex;gap:8px}
+.seg-set label{flex:1 1 0;display:flex;align-items:center;justify-content:center;min-height:44px;
+  border:1px solid var(--stroke-2);border-radius:12px;font-size:12.5px;font-weight:650;color:var(--muted);cursor:pointer;transition:.15s}
+.seg-set input{position:absolute;opacity:0;width:0;height:0}
+.seg-set label:has(input:checked){color:var(--text);border-color:var(--violet);background:rgba(99,102,241,.16)}
 .btn{border:1px solid var(--stroke-2);background:var(--surface-2);color:var(--text);font-size:12px;font-weight:650;
   padding:0 14px;min-height:42px;border-radius:12px;white-space:nowrap;transition:transform .16s ease,background .16s ease}
 .btn:hover{background:rgba(255,255,255,.12)}
@@ -294,6 +310,8 @@ button{cursor:pointer}
 .hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin:10px 0 0}
 .pill-ok{font-size:10.5px;font-weight:700;color:var(--green);background:rgba(52,211,153,.13);
   border:1px solid rgba(52,211,153,.3);padding:4px 9px;border-radius:999px;white-space:nowrap}
+.pill-on{font-size:10.5px;font-weight:700;color:#c7c9ff;background:rgba(99,102,241,.16);
+  border:1px solid rgba(99,102,241,.32);padding:4px 9px;border-radius:999px;white-space:nowrap}
 
 /* Sheet */
 .scrim{position:fixed;inset:0;background:rgba(3,5,11,.66);backdrop-filter:blur(3px);opacity:0;visibility:hidden;
@@ -324,6 +342,13 @@ button{cursor:pointer}
 .err{font-size:11.5px;color:var(--rose);margin-top:-6px;margin-bottom:10px}
 .err[hidden]{display:none}
 
+/* Backup rows in sheet */
+.bak-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--stroke)}
+.bak-row:first-of-type{border-top:none}
+.bak-row .txt{flex:1 1 0;min-width:0}
+.bak-row .txt b{display:block;font-size:13px;font-weight:700}
+.bak-row .txt span{display:block;font-size:11.5px;color:var(--muted);margin-top:2px}
+
 /* Notification items inside sheet */
 .notif{display:flex;gap:12px;align-items:flex-start;padding:13px 0;border-top:1px solid var(--stroke)}
 .notif:first-of-type{border-top:none}
@@ -331,6 +356,29 @@ button{cursor:pointer}
 .notif b{display:block;font-size:13px;font-weight:700}
 .notif span{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
 .notif .amt{margin-left:auto;font-size:13px;font-weight:750;white-space:nowrap}
+
+/* Lock screen */
+.lock{position:fixed;inset:0;z-index:90;background:
+  radial-gradient(120% 55% at 8% -5%,rgba(99,102,241,.34),transparent 60%),
+  radial-gradient(90% 45% at 100% 0%,rgba(34,211,238,.20),transparent 55%),
+  linear-gradient(180deg,#0b1224,#070b16 40%,#04060d);
+  display:flex;align-items:center;justify-content:center;padding:24px}
+.lock[hidden]{display:none}
+.lock-card{width:100%;max-width:300px;text-align:center}
+.lock .logo{margin:0 auto 18px;width:54px;height:54px;border-radius:18px}
+.lock .logo svg{width:28px;height:28px}
+.lock h2{font-size:20px;font-weight:750;letter-spacing:-.3px;margin:0 0 6px}
+.lock .sub{font-size:13px;color:var(--muted);margin:0 0 22px;line-height:1.4}
+.lock-dots{display:flex;gap:16px;justify-content:center;margin-bottom:24px}
+.lock-dots .dot{width:16px;height:16px;border-radius:50%;border:2px solid var(--stroke-2);background:transparent;transition:.15s}
+.lock-dots .dot.on{background:var(--violet);border-color:var(--violet);box-shadow:0 0 12px rgba(99,102,241,.7)}
+.lock-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;max-width:260px;margin:0 auto}
+.lock-pad button{min-height:58px;border-radius:16px;border:1px solid var(--stroke);background:var(--surface);
+  color:var(--text);font-size:22px;font-weight:700;backdrop-filter:blur(12px);transition:transform .12s ease,background .15s ease}
+.lock-pad button:active{transform:scale(.92);background:var(--surface-2)}
+.lock-pad .del{font-size:18px;color:var(--muted)}
+.lock .err{margin-top:16px}
+.lock .lock-foot{margin-top:18px;font-size:11px;color:var(--faint)}
 
 /* iOS install banner */
 .ios-banner{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--nav-h) + var(--safe-b) + 12px);
@@ -422,13 +470,46 @@ button{cursor:pointer}
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
+<div class="lock" id="lock" hidden>
+  <div class="lock-card">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#08101f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/>
+      </svg>
+    </div>
+    <h2 id="lockTitle">PIN Girişi</h2>
+    <p class="sub" id="lockSub">Ödeme takibini açmak için PIN girin</p>
+    <div class="lock-dots" id="lockDots"></div>
+    <p class="err" id="lockErr" hidden></p>
+    <div class="lock-pad" id="lockPad">
+      <button type="button" data-key="1">1</button>
+      <button type="button" data-key="2">2</button>
+      <button type="button" data-key="3">3</button>
+      <button type="button" data-key="4">4</button>
+      <button type="button" data-key="5">5</button>
+      <button type="button" data-key="6">6</button>
+      <button type="button" data-key="7">7</button>
+      <button type="button" data-key="8">8</button>
+      <button type="button" data-key="9">9</button>
+      <button type="button" class="del" data-key="del" aria-label="Sil">⌫</button>
+      <button type="button" data-key="0">0</button>
+      <button type="button" class="del" data-key="clr" aria-label="Temizle">C</button>
+    </div>
+    <p class="lock-foot" id="lockFoot"></p>
+  </div>
+</div>
+
 <script>
 (function(){
   "use strict";
 
   var KEY = "odeme-takip-v1";
-  var TODAY_REF = new Date(2026, 2, 14); // tasarım referansındaki "bugün" (gecikme hesabı)
-  var VERSION = "1.0.0";
+  var SETTINGS_KEY = "odeme-takip-settings";
+  var PIN_KEY = "odeme-takip-pin";
+  var BACKUP_DB = "odeme-takip-backups";
+  var BACKUP_STORE = "snapshots";
+  var MAX_BACKUPS = 5;
+  var VERSION = "2.0.0";
   var MONTHS = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
   var MONTHS_SHORT = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
 
@@ -457,8 +538,13 @@ button{cursor:pointer}
     ];
   }
 
-  var payments = [], month = 2, year = 2026, filter = "all", tab = "pay", sheetKind = "";
+  var payments = [];
+  var _now = new Date();
+  var month = _now.getMonth(), year = _now.getFullYear();
+  var filter = "all", tab = "pay", sheetKind = "", editId = null;
+  var settings = { backupInterval:"off", notifyDays:3, lastBackup:0 };
 
+  /* ---------- Helpers ---------- */
   function byId(id){ for (var i=0;i<payments.length;i++){ if (payments[i].id===id) return payments[i]; } return null; }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
   function tl(n){ return "₺" + Number(n).toLocaleString("tr-TR"); }
@@ -467,26 +553,169 @@ button{cursor:pointer}
   function dayLabel(s){ var d=parseISO(s); return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear(); }
   function sameMonth(p){ var d=parseISO(p.due); return d.getMonth()===month && d.getFullYear()===year; }
   function sum(arr,f){ return arr.reduce(function(a,p){ return a + (f?f(p):p.amount); },0); }
+  function todayMid(){ var d=new Date(); return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 
-  function save(){ try { localStorage.setItem(KEY, JSON.stringify({ version:1, payments:payments })); } catch(e){} }
+  /* ---------- Settings ---------- */
+  function loadSettings(){
+    try { var s = localStorage.getItem(SETTINGS_KEY); if (s){ settings = Object.assign(settings, JSON.parse(s)); } } catch(e){}
+  }
+  function saveSettings(){ try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings)); } catch(e){} }
+
+  /* ---------- Storage ---------- */
+  function save(){ try { localStorage.setItem(KEY, JSON.stringify({ version:1, payments:payments, seeded:true })); } catch(e){} }
   function load(){
-    var raw = null;
+    var raw = null, seeded = false;
     try { raw = localStorage.getItem(KEY); } catch(e){}
     if (raw){
       try {
         var data = JSON.parse(raw);
-        if (data && Array.isArray(data.payments) && data.payments.length){ payments = data.payments; }
+        if (data && Array.isArray(data.payments)){ payments = data.payments; seeded = !!data.seeded; }
       } catch(e){ payments = []; }
     }
-    if (!payments.length){ payments = seed(); save(); }
+    if (!payments.length && !seeded){ payments = seed(); save(); }
     applyOverdue();
   }
   function applyOverdue(){
-    var changed = false;
+    var t = todayMid(), changed = false;
     payments.forEach(function(p){
-      if (p.status==="wait" && parseISO(p.due) < TODAY_REF){ p.status = "late"; changed = true; }
+      if (p.status==="wait" && parseISO(p.due) < t){ p.status = "late"; changed = true; }
     });
     if (changed) save();
+  }
+
+  /* ---------- PIN ---------- */
+  function simpleHash(str){
+    var h = 5381;
+    for (var i=0;i<str.length;i++){ h = ((h<<5)+h) ^ str.charCodeAt(i); }
+    return (h >>> 0).toString(16);
+  }
+  function pinSet(){ try { return !!localStorage.getItem(PIN_KEY); } catch(e){ return false; } }
+  function setPin(pin){ try { localStorage.setItem(PIN_KEY, simpleHash(pin)); } catch(e){} }
+  function clearPin(){ try { localStorage.removeItem(PIN_KEY); } catch(e){} }
+  function verifyPin(pin){ try { return localStorage.getItem(PIN_KEY) === simpleHash(pin); } catch(e){ return false; } }
+
+  var lockMode = "", lockPin = "", lockFirstPin = "", lockAttempts = 0, lockLockUntil = 0, appStarted = false;
+
+  function showLock(mode){
+    lockMode = mode; lockPin = ""; lockFirstPin = ""; lockAttempts = 0;
+    var lock = document.getElementById("lock");
+    lock.hidden = false;
+    updateLockUI();
+  }
+  function hideLock(){ document.getElementById("lock").hidden = true; }
+  function renderLockDots(){
+    var el = document.getElementById("lockDots"), html = "";
+    for (var i=0;i<4;i++){ html += '<span class="dot' + (i<lockPin.length?" on":"") + '"></span>'; }
+    el.innerHTML = html;
+  }
+  function updateLockUI(){
+    var title = document.getElementById("lockTitle");
+    var sub = document.getElementById("lockSub");
+    var foot = document.getElementById("lockFoot");
+    var pad = document.getElementById("lockPad");
+    var now = Date.now();
+    if (lockMode === "login"){
+      title.textContent = "PIN Girişi";
+      sub.textContent = "Ödeme takibini açmak için PIN girin";
+      foot.textContent = "";
+    } else if (lockMode === "setup"){
+      title.textContent = "PIN Belirle";
+      sub.textContent = "Uygulamayı sadece sen kullan — 4 haneli PIN belirle";
+      foot.textContent = "PIN'i unutma; sıfırlamak verileri siler.";
+    } else if (lockMode === "confirm"){
+      title.textContent = "PIN Onayla";
+      sub.textContent = "Aynı PIN'i tekrar gir";
+      foot.textContent = "";
+    }
+    if (lockMode === "login" && lockLockUntil > now){
+      var secs = Math.ceil((lockLockUntil - now)/1000);
+      sub.textContent = "Çok fazla deneme. " + secs + " sn bekleyin.";
+      pad.style.opacity = .35; pad.style.pointerEvents = "none";
+    } else {
+      pad.style.opacity = 1; pad.style.pointerEvents = "";
+    }
+    renderLockDots();
+  }
+  function lockPress(d){
+    if (lockMode === "login" && lockLockUntil > Date.now()) return;
+    if (d === "clr"){ lockPin = ""; renderLockDots(); return; }
+    if (d === "del"){ lockPin = lockPin.slice(0,-1); renderLockDots(); return; }
+    if (lockPin.length >= 4) return;
+    lockPin += d;
+    renderLockDots();
+    if (lockPin.length === 4) setTimeout(lockSubmit, 130);
+  }
+  function lockSubmit(){
+    var err = document.getElementById("lockErr");
+    err.hidden = true;
+    if (lockMode === "login"){
+      if (verifyPin(lockPin)){
+        hideLock(); startApp();
+      } else {
+        lockAttempts++; lockPin = ""; renderLockDots();
+        if (lockAttempts >= 3){
+          lockLockUntil = Date.now() + 30000; lockAttempts = 0;
+          err.textContent = "3 yanlış deneme. 30 saniye bekleyin.";
+        } else {
+          err.textContent = "Yanlış PIN. Kalan deneme: " + (3 - lockAttempts);
+        }
+        err.hidden = false; updateLockUI();
+      }
+    } else if (lockMode === "setup"){
+      lockFirstPin = lockPin; lockPin = ""; lockMode = "confirm"; updateLockUI();
+    } else if (lockMode === "confirm"){
+      if (lockPin === lockFirstPin){
+        setPin(lockPin); lockPin = ""; hideLock();
+        if (!appStarted){ startApp(); toast("PIN belirlendi"); }
+        else { toast("PIN belirlendi"); render(); }
+      } else {
+        lockPin = ""; lockMode = "setup"; updateLockUI();
+        err.textContent = "PIN'ler eşleşmedi. Tekrar belirle."; err.hidden = false;
+      }
+    }
+  }
+  document.getElementById("lockPad").addEventListener("click", function(e){
+    var b = e.target.closest("button"); if (!b) return;
+    lockPress(b.getAttribute("data-key"));
+  });
+
+  /* ---------- IndexedDB backups ---------- */
+  function withIDB(cb, errCb){
+    if (!("indexedDB" in window)){ if(errCb) errCb(); return; }
+    try {
+      var req = indexedDB.open(BACKUP_DB, 1);
+      req.onupgradeneeded = function(){ req.result.createObjectStore(BACKUP_STORE, { keyPath:"ts" }); };
+      req.onsuccess = function(){ cb(req.result); };
+      req.onerror = function(){ if(errCb) errCb(); };
+    } catch(e){ if(errCb) errCb(); }
+  }
+  function saveBackupSnapshot(){
+    withIDB(function(db){
+      try {
+        var snap = { ts: Date.now(), date: new Date().toISOString(), payments: JSON.parse(JSON.stringify(payments)), count: payments.length };
+        var tx = db.transaction(BACKUP_STORE, "readwrite");
+        tx.objectStore(BACKUP_STORE).add(snap);
+        tx.oncomplete = function(){
+          var tx2 = db.transaction(BACKUP_STORE, "readonly");
+          tx2.objectStore(BACKUP_STORE).getAll().onsuccess = function(e){
+            var all = e.target.result.sort(function(a,b){ return a.ts - b.ts; });
+            if (all.length > MAX_BACKUPS){
+              var toDel = all.slice(0, all.length - MAX_BACKUPS);
+              var tx3 = db.transaction(BACKUP_STORE, "readwrite");
+              toDel.forEach(function(s){ tx3.objectStore(BACKUP_STORE).delete(s.ts); });
+            }
+          };
+        };
+      } catch(e){}
+    });
+  }
+  function listBackups(cb){
+    withIDB(function(db){
+      var tx = db.transaction(BACKUP_STORE, "readonly");
+      tx.objectStore(BACKUP_STORE).getAll().onsuccess = function(e){
+        cb(e.target.result.sort(function(a,b){ return b.ts - a.ts; }));
+      };
+    }, function(){ cb([]); });
   }
 
   /* ---------- Views ---------- */
@@ -507,11 +736,12 @@ button{cursor:pointer}
     });
 
     var html = "";
-    html += '<div class="monthbar">'
+    html += '<div class="monthbar" id="monthbar">'
       + '<button class="m-btn" id="prevMonth" type="button" aria-label="Önceki ay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>'
       + '<div class="m-label"><b>' + MONTHS[month] + " " + year + '</b><span id="todayLabel"></span></div>'
       + '<button class="m-btn" id="nextMonth" type="button" aria-label="Sonraki ay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>'
       + '</div>';
+    html += '<div class="swipe-hint">← Ay değiştirmek için kaydır →</div>';
 
     html += '<section class="hero"><div class="hero-top"><div>'
       + '<div class="eyebrow">Dönem Toplamı</div>'
@@ -550,7 +780,7 @@ button{cursor:pointer}
     } else {
       shown.forEach(function(p,i){
         var c = CATS[p.cat] || CATS.fatura, s = STATUS[p.status];
-        html += '<article class="pay ' + (p.status==="done"?"done":"") + '" style="--accent:' + c.color + ';animation-delay:' + (i*45) + 'ms">'
+        html += '<article class="pay ' + (p.status==="done"?"done":"") + '" data-id="' + p.id + '" style="--accent:' + c.color + ';animation-delay:' + (i*45) + 'ms">'
           + '<div class="p-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + c.icon + '</svg></div>'
           + '<div class="p-body">'
           + '<div class="p-row1"><span class="p-cat">' + esc(c.label) + '</span><span class="amt od-nowrap">' + tl(p.amount) + '</span></div>'
@@ -560,6 +790,7 @@ button{cursor:pointer}
           + (p.status==="done"
               ? '<button class="ghost" data-act="undo" data-id="' + p.id + '" type="button">Geri Al</button>'
               : '<button class="primary" data-act="pay" data-id="' + p.id + '" type="button">Ödendi Yap</button><button class="ghost" data-act="postpone" data-id="' + p.id + '" type="button">Ertele</button>')
+          + '<button class="ghost" data-act="edit" data-id="' + p.id + '" type="button">Düzenle</button>'
           + '<button class="ghost" data-act="del" data-id="' + p.id + '" type="button">Sil</button>'
           + '</div></div></article>';
       });
@@ -587,7 +818,9 @@ button{cursor:pointer}
     var segs = "";
     rows.forEach(function(r){
       var len = total ? C * (r.value/total) : 0;
-      segs += '<circle cx="90" cy="90" r="60" fill="none" stroke="' + r.color + '" stroke-width="20" stroke-dasharray="' + len.toFixed(2) + " " + (C-len).toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '"/>';
+      var gap = 3;
+      var drawLen = Math.max(0, len - gap);
+      segs += '<circle cx="90" cy="90" r="60" fill="none" stroke="' + r.color + '" stroke-width="20" stroke-dasharray="' + drawLen.toFixed(2) + " " + (C-drawLen).toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '"/>';
       acc += len;
     });
 
@@ -599,16 +832,19 @@ button{cursor:pointer}
       + '<circle cx="90" cy="90" r="60" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="20"/>' + segs
       + '</svg>'
       + '<div class="donut-center"><b class="od-nowrap">' + tl(total) + '</b><span>' + inMonth.length + ' ödeme</span></div>'
-      + '</div>'
-      + '<div class="legend">';
+      + '</div>';
     if (!rows.length){
-      html += '<div class="row"><span class="nm">Bu ay için kayıt yok</span></div>';
+      html += '<p class="hint" style="text-align:center">Bu ay için kayıt yok.</p>';
     }
     rows.forEach(function(r){
       var p = total ? Math.round(r.value/total*100) : 0;
-      html += '<div class="row"><i class="dot" style="background:' + r.color + '"></i><span class="nm">' + esc(r.label) + '</span><span class="vl od-nowrap">' + tl(r.value) + '</span><span class="pc">' + p + '%</span></div>';
+      html += '<div class="cat-row"><div class="cat-top"><i class="dot" style="background:' + r.color + '"></i>'
+        + '<span class="nm">' + esc(r.label) + '</span>'
+        + '<span class="vl od-nowrap">' + tl(r.value) + '</span>'
+        + '<span class="pc">' + p + '%</span></div>'
+        + '<div class="cat-bar"><span style="width:' + p + '%;background:' + r.color + '"></span></div></div>';
     });
-    html += '</div></div>';
+    html += '</div>';
 
     html += '<div class="card"><h3>Ödenen / Bekleyen</h3>'
       + '<div class="bar-track">'
@@ -677,23 +913,61 @@ button{cursor:pointer}
 
   function viewSettings(){
     var notifOk = ("Notification" in window) && Notification.permission === "granted";
+    var hasPin = pinSet();
+    var bakInterval = settings.backupInterval || "off";
+    var notifyDays = settings.notifyDays || 3;
+
     var html = '<div class="page">'
       + '<div class="sec-head" style="margin-top:4px"><h2>Ayarlar</h2><span class="count">v' + VERSION + '</span></div>';
 
+    /* PIN */
+    html += '<div class="card"><h3>Güvenlik</h3>'
+      + '<div class="set-row"><div class="txt"><b>PIN kilidi</b><span>Uygulama sadece senin PIN\'in ile açılır.</span></div>'
+      + (hasPin ? '<span class="pill-on">Açık</span>' : '<span class="pill-ok" style="color:var(--muted);background:var(--surface);border-color:var(--stroke)">Kapalı</span>')
+      + '</div>';
+    if (hasPin){
+      html += '<div class="set-row"><div class="txt"><b>PIN\'i değiştir</b><span>Yeni bir PIN belirle.</span></div><button class="btn" id="changePinBtn" type="button">Değiştir</button></div>'
+        + '<div class="set-row"><div class="txt"><b>PIN\'i kaldır</b><span>Kilidi kapatır; uygulama doğrudan açılır.</span></div><button class="btn danger" id="removePinBtn" type="button">Kaldır</button></div>';
+    } else {
+      html += '<div class="set-row"><div class="txt"><b>PIN belirle</b><span>Sadece senin girebilmen için 4 haneli PIN oluştur.</span></div><button class="btn primary" id="setPinBtn" type="button">Belirle</button></div>';
+    }
+    html += '</div>';
+
+    /* Notifications */
     html += '<div class="card"><h3>Bildirimler</h3>'
       + '<div class="set-row"><div class="txt"><b>Vade hatırlatması</b><span>Yaklaşan ve gecikmiş ödemeler için bildirim gönderir.</span></div>'
       + (notifOk ? '<span class="pill-ok">Açık</span>' : '<button class="btn primary" id="notifBtn" type="button">İzni Aç</button>')
       + '</div>'
+      + '<div class="set-col"><span class="lbl">Kaç gün önce uyarılsın?</span><div class="seg-set">'
+      + '<label><input type="radio" name="ndays" value="1"' + (notifyDays===1?" checked":"") + ' /> 1 gün</label>'
+      + '<label><input type="radio" name="ndays" value="3"' + (notifyDays===3?" checked":"") + ' /> 3 gün</label>'
+      + '<label><input type="radio" name="ndays" value="7"' + (notifyDays===7?" checked":"") + ' /> 7 gün</label>'
+      + '</div></div>'
       + '<div class="kv"><span class="k">İzin durumu</span><span class="v">' + notifPermissionLabel() + '</span></div>'
       + '</div>';
 
+    /* Backup */
+    html += '<div class="card"><h3>Yedekleme</h3>'
+      + '<div class="set-col"><span class="lbl">Otomatik yedek sıklığı</span><div class="seg-set">'
+      + '<label><input type="radio" name="bint" value="off"' + (bakInterval==="off"?" checked":"") + ' /> Kapalı</label>'
+      + '<label><input type="radio" name="bint" value="daily"' + (bakInterval==="daily"?" checked":"") + ' /> Günlük</label>'
+      + '<label><input type="radio" name="bint" value="weekly"' + (bakInterval==="weekly"?" checked":"") + ' /> Haftalık</label>'
+      + '<label><input type="radio" name="bint" value="monthly"' + (bakInterval==="monthly"?" checked":"") + ' /> Aylık</label>'
+      + '</div></div>'
+      + '<div class="set-row"><div class="txt"><b>Şimdi yedekle</b><span>Veriyi telefona dosya olarak kaydeder (son 5 yedek cihazda tutulur).</span></div><button class="btn primary" id="backupNowBtn" type="button">Yedekle</button></div>'
+      + '<div class="set-row"><div class="txt"><b>Yedekten geri yükle</b><span>Cihazdaki son yedeklerden veya dosyadan geri yükle.</span></div><button class="btn" id="restoreBtn" type="button">Geri Yükle</button></div>'
+      + '<div class="kv"><span class="k">Son yedek</span><span class="v">' + (settings.lastBackup ? new Date(settings.lastBackup).toLocaleString("tr-TR") : "—") + '</span></div>'
+      + '</div>';
+
+    /* Data */
     html += '<div class="card"><h3>Veri</h3>'
       + '<div class="set-row"><div class="txt"><b>JSON dışa aktar</b><span>Tüm ödemeleri yedek dosyası olarak indir.</span></div><button class="btn" id="exportBtn" type="button">Dışa Aktar</button></div>'
       + '<div class="set-row"><div class="txt"><b>JSON içe aktar</b><span>Yedek dosyasından verileri geri yükle.</span></div><button class="btn" id="importBtn" type="button">İçe Aktar</button></div>'
       + '<input type="file" id="importFile" accept="application/json,.json" hidden />'
-      + '<div class="set-row"><div class="txt"><b>Tüm veriyi sıfırla</b><span>Kayıtları siler ve örnek veriye döner.</span></div><button class="btn danger" id="resetBtn" type="button">Sıfırla</button></div>'
+      + '<div class="set-row"><div class="txt"><b>Tüm veriyi sıfırla</b><span>Tüm kayıtları kalıcı olarak siler (boş başlangıç).</span></div><button class="btn danger" id="resetBtn" type="button">Sıfırla</button></div>'
       + '</div>';
 
+    /* App */
     html += '<div class="card"><h3>Uygulama</h3>'
       + '<div class="set-row"><div class="txt"><b>Ana ekrana ekle</b><span>Uygulamayı çevrimdışı kullan.</span></div>'
       + '<button class="btn grad-border" id="settingsInstall" type="button">Yükle</button></div>'
@@ -733,6 +1007,26 @@ button{cursor:pointer}
     });
     fab.hidden = tab !== "pay";
     bell.setAttribute("data-empty", payments.some(function(p){ return p.status!=="done"; }) ? "0" : "1");
+
+    if (tab === "pay") attachMonthSwipe();
+  }
+
+  function attachMonthSwipe(){
+    var mb = document.getElementById("monthbar");
+    if (!mb || mb._swipe) return;
+    mb._swipe = true;
+    var sx=0, sy=0, active=false;
+    mb.addEventListener("touchstart", function(e){ var t=e.touches[0]; sx=t.clientX; sy=t.clientY; active=true; }, {passive:true});
+    mb.addEventListener("touchend", function(e){
+      if (!active) return; active=false;
+      var t=e.changedTouches[0];
+      var dx=t.clientX-sx, dy=t.clientY-sy;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy)*1.4){
+        if (dx < 0){ month += 1; if (month>11){month=0;year+=1;} }
+        else { month -= 1; if (month<0){month=11;year-=1;} }
+        render();
+      }
+    }, {passive:true});
   }
 
   function toast(msg){
@@ -740,7 +1034,7 @@ button{cursor:pointer}
     t.textContent = msg;
     t.classList.add("on");
     clearTimeout(toast._t);
-    toast._t = setTimeout(function(){ t.classList.remove("on"); }, 2200);
+    toast._t = setTimeout(function(){ t.classList.remove("on"); }, 2400);
   }
 
   /* ---------- Sheet ---------- */
@@ -749,44 +1043,63 @@ button{cursor:pointer}
   var sheetBody = document.getElementById("sheetBody");
 
   function todayISO(){
-    var d = new Date(TODAY_REF);
+    var d = new Date();
     return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
   }
 
-  function openSheet(kind){
+  function openSheet(kind, id){
     sheetKind = kind;
-    if (kind === "add"){
-      var opts = CAT_ORDER.map(function(k){ return '<option value="' + k + '">' + CATS[k].label + '</option>'; }).join("");
-      sheetBody.innerHTML = '<h3>Yeni Ödeme</h3>'
+    if (kind === "add" || kind === "edit"){
+      var p = kind === "edit" ? byId(id) : null;
+      editId = kind === "edit" ? id : null;
+      var opts = CAT_ORDER.map(function(k){ return '<option value="' + k + '"' + (p && p.cat===k ? " selected":"") + '>' + CATS[k].label + '</option>'; }).join("");
+      sheetBody.innerHTML = '<h3>' + (kind==="edit"?"Ödemeyi Düzenle":"Yeni Ödeme") + '</h3>'
         + '<form id="addForm" novalidate>'
         + '<label class="fl"><span>Kategori</span><select name="cat" required>' + opts + '</select></label>'
-        + '<label class="fl"><span>Tutar (₺)</span><input name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" required /></label>'
-        + '<label class="fl"><span>Vade</span><input name="due" type="date" value="' + todayISO() + '" required /></label>'
-        + '<label class="fl"><span>Not</span><input name="note" type="text" maxlength="80" placeholder="Örn. Mart 2026 elektrik" /></label>'
+        + '<label class="fl"><span>Tutar (₺)</span><input name="amount" type="number" min="1" step="1" inputmode="numeric" placeholder="0" value="' + (p?p.amount:"") + '" required /></label>'
+        + '<label class="fl"><span>Vade</span><input name="due" type="date" value="' + (p?p.due:todayISO()) + '" required /></label>'
+        + '<label class="fl"><span>Not</span><input name="note" type="text" maxlength="80" placeholder="Örn. Mart 2026 elektrik" value="' + esc(p?p.note:"") + '" /></label>'
         + '<div class="fl"><span>Tekrar</span><div class="seg">'
-        + '<label><input type="radio" name="repeat" value="once" checked /> Tek sefer</label>'
-        + '<label><input type="radio" name="repeat" value="monthly" /> Aylık</label>'
+        + '<label><input type="radio" name="repeat" value="once"' + (p && p.repeat!=="monthly" ? " checked":"") + ' /> Tek sefer</label>'
+        + '<label><input type="radio" name="repeat" value="monthly"' + (p && p.repeat==="monthly" ? " checked":"") + ' /> Aylık</label>'
         + '</div></div>'
         + '<p class="err" id="formErr" hidden></p>'
-        + '<div class="form-actions"><button class="btn ghost" type="button" data-sheet-close>Vazgeç</button><button class="btn primary" type="submit">Kaydet</button></div>'
+        + '<div class="form-actions"><button class="btn ghost" type="button" data-sheet-close>Vazgeç</button><button class="btn primary" type="submit">' + (kind==="edit"?"Güncelle":"Kaydet") + '</button></div>'
         + '</form>';
+    } else if (kind === "restore"){
+      sheetBody.innerHTML = '<h3>Yedekten Geri Yükle</h3><div id="restoreList"><p class="hint">Yükleniyor...</p></div>';
+      listBackups(function(list){
+        var el = document.getElementById("restoreList");
+        if (!el) return;
+        var html = "";
+        if (list.length){
+          html += '<p class="hint">Cihazdaki son ' + list.length + ' yedek (en yeniden eskiye):</p>';
+          list.forEach(function(s){
+            var d = new Date(s.ts);
+            html += '<div class="bak-row"><div class="txt"><b>' + d.toLocaleString("tr-TR") + '</b><span>' + (s.count||0) + ' ödeme</span></div>'
+              + '<button class="btn" data-restore="' + s.ts + '" type="button">Geri Yükle</button></div>';
+          });
+        } else {
+          html += '<p class="hint">Cihaz içinde yedek yok. Aşağıdan dosya da seçebilirsin.</p>';
+        }
+        html += '<div class="form-actions" style="margin-top:14px"><button class="btn" type="button" id="restoreFileBtn">Dosya Seç</button><button class="btn ghost" type="button" data-sheet-close>Kapat</button></div>'
+          + '<input type="file" id="restoreFile" accept="application/json,.json" hidden />';
+        el.innerHTML = html;
+      });
     } else {
       sheetBody.innerHTML = '<h3>Bildirimler</h3>' + notifListHTML();
     }
     scrim.classList.add("on");
     sheet.classList.add("on");
-    if (kind === "add"){
+    if (kind === "add" || kind === "edit"){
       var first = sheetBody.querySelector("select");
       if (first) setTimeout(function(){ first.focus(); }, 250);
-    } else {
-      var closeBtn = sheetBody.querySelector("[data-sheet-close]");
-      if (closeBtn) closeBtn.focus();
     }
   }
   function closeSheet(){
     scrim.classList.remove("on");
     sheet.classList.remove("on");
-    sheetKind = "";
+    sheetKind = ""; editId = null;
   }
 
   function notifListHTML(){
@@ -826,13 +1139,15 @@ button{cursor:pointer}
       }
     } else if (act === "undo"){
       p.status = "wait"; p.note = "Ödeme bekliyor";
-      if (parseISO(p.due) < TODAY_REF) p.status = "late";
+      if (parseISO(p.due) < todayMid()) p.status = "late";
       save(); render(); toast("Geri alındı");
     } else if (act === "postpone"){
       var d = parseISO(p.due); d.setDate(d.getDate()+7);
       p.due = d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate());
-      if (p.status === "late" && d >= TODAY_REF) p.status = "wait";
+      if (p.status === "late" && d >= todayMid()) p.status = "wait";
       save(); render(); toast("Vade 7 gün ertelendi");
+    } else if (act === "edit"){
+      openSheet("edit", id);
     } else if (act === "del"){
       payments = payments.filter(function(x){ return x.id !== id; });
       save(); render(); toast("Ödeme silindi");
@@ -841,7 +1156,13 @@ button{cursor:pointer}
 
   /* ---------- Events ---------- */
   view.addEventListener("click", function(e){
-    var btn = e.target.closest("button"); if (!btn) return;
+    var btn = e.target.closest("button");
+    var card = e.target.closest(".pay");
+    if (card && !btn){
+      openSheet("edit", +card.getAttribute("data-id"));
+      return;
+    }
+    if (!btn) return;
     if (btn.id === "prevMonth"){
       month -= 1; if (month < 0){ month = 11; year -= 1; }
       render(); return;
@@ -857,32 +1178,63 @@ button{cursor:pointer}
     if (chip){ filter = chip.getAttribute("data-filter"); render(); return; }
     var col = btn.closest(".ycol");
     if (col){ month = +col.getAttribute("data-month"); tab = "pay"; render(); return; }
-    if (btn.id === "notifBtn"){
-      requestNotif(); return;
-    }
-    if (btn.id === "exportBtn"){
-      exportJSON(); return;
-    }
-    if (btn.id === "importBtn"){
-      document.getElementById("importFile").click(); return;
-    }
+    if (btn.id === "notifBtn"){ requestNotif(); return; }
+    if (btn.id === "exportBtn"){ exportJSON(); return; }
+    if (btn.id === "importBtn"){ document.getElementById("importFile").click(); return; }
     if (btn.id === "resetBtn"){
-      if (confirm("Tüm ödemeler silinip örnek veriye dönülecek. Emin misin?")){
-        payments = seed(); save(); filter = "all"; render(); toast("Veriler sıfırlandı");
+      if (confirm("Tüm ödemeler kalıcı olarak silinecek. Emin misin?")){
+        payments = []; save(); filter = "all"; render(); toast("Veriler silindi");
       }
       return;
     }
+    if (btn.id === "backupNowBtn"){ doBackup(); return; }
+    if (btn.id === "restoreBtn"){ openSheet("restore"); return; }
+    if (btn.id === "restoreFileBtn"){ var rf = document.getElementById("restoreFile"); if (rf) rf.click(); return; }
+    if (btn.id === "setPinBtn"){ showLock("setup"); return; }
+    if (btn.id === "changePinBtn"){ clearPin(); showLock("setup"); return; }
+    if (btn.id === "removePinBtn"){ clearPin(); toast("PIN kaldırıldı"); render(); return; }
     if (btn.id === "settingsInstall"){ doInstall(); return; }
+    if (btn.hasAttribute("data-restore")){
+      var ts = +btn.getAttribute("data-restore");
+      listBackups(function(list){
+        var snap = list.filter(function(s){ return s.ts === ts; })[0];
+        if (snap && snap.payments){
+          payments = snap.payments; applyOverdue(); save(); render(); closeSheet();
+          toast("Yedek geri yüklendi");
+        }
+      });
+      return;
+    }
     if (btn.hasAttribute("data-act")){
       handleAction(btn.getAttribute("data-act"), +btn.getAttribute("data-id"));
     }
   });
 
   view.addEventListener("change", function(e){
-    if (e.target && e.target.id === "importFile"){
+    if (!e.target) return;
+    if (e.target.id === "importFile"){
       var f = e.target.files && e.target.files[0];
       if (f) importJSON(f);
       e.target.value = "";
+      return;
+    }
+    if (e.target.id === "restoreFile"){
+      var f2 = e.target.files && e.target.files[0];
+      if (f2) importJSON(f2);
+      e.target.value = "";
+      return;
+    }
+    if (e.target.name === "ndays" && e.target.checked){
+      settings.notifyDays = parseInt(e.target.value, 10) || 3;
+      saveSettings();
+      checkReminders(true);
+      return;
+    }
+    if (e.target.name === "bint" && e.target.checked){
+      settings.backupInterval = e.target.value;
+      saveSettings();
+      toast("Yedek sıklığı kaydedildi");
+      return;
     }
   });
 
@@ -926,14 +1278,26 @@ button{cursor:pointer}
       return;
     }
     err.hidden = true;
-    var status = parseISO(due) < TODAY_REF ? "late" : "wait";
-    payments.push({ id:Date.now(), cat:cat, amount:amount, due:due, status:status, note:note || "Yeni ödeme", repeat:repeat });
+    var isLate = parseISO(due) < todayMid();
+    var status = isLate ? "late" : "wait";
+    if (editId){
+      var p = byId(editId);
+      if (p){
+        p.cat = cat; p.amount = amount; p.due = due;
+        p.note = note || p.note || "Ödeme";
+        p.repeat = repeat;
+        if (p.status !== "done") p.status = status;
+      }
+      toast("Ödeme güncellendi");
+    } else {
+      payments.push({ id:Date.now(), cat:cat, amount:amount, due:due, status:status, note:note || "Yeni ödeme", repeat:repeat });
+      toast("Ödeme eklendi");
+    }
     save();
     closeSheet();
     var d = parseISO(due);
     month = d.getMonth(); year = d.getFullYear(); filter = "all"; tab = "pay";
     render();
-    toast("Ödeme eklendi");
   }
 
   /* ---------- Data I/O ---------- */
@@ -962,11 +1326,42 @@ button{cursor:pointer}
                    note:p.note || "", repeat:p.repeat==="monthly"?"monthly":"once" };
         });
         if (!payments.length) throw new Error("empty");
-        applyOverdue(); save(); render(); toast("Veriler içe aktarıldı");
+        applyOverdue(); save(); render(); closeSheet();
+        toast("Veriler içe aktarıldı");
       } catch(e){ toast("Geçersiz yedek dosyası"); }
     };
     r.onerror = function(){ toast("Dosya okunamadı"); };
     r.readAsText(file);
+  }
+
+  /* ---------- Backup ---------- */
+  function doBackup(){
+    saveBackupSnapshot();
+    try {
+      var ts = new Date();
+      var name = "finans-yedek-" + ts.getFullYear() + "-" + pad(ts.getMonth()+1) + "-" + pad(ts.getDate()) + "-" + pad(ts.getHours()) + pad(ts.getMinutes()) + ".json";
+      var blob = new Blob([JSON.stringify({ version:1, exportedAt:ts.toISOString(), payments:payments }, null, 2)], { type:"application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = name;
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 1000);
+    } catch(e){}
+    settings.lastBackup = Date.now();
+    saveSettings();
+    toast("Yedek telefona kaydedildi");
+  }
+
+  function checkAutoBackup(){
+    if (settings.backupInterval === "off") return;
+    var map = { daily:86400000, weekly:7*86400000, monthly:30*86400000 };
+    var interval = map[settings.backupInterval];
+    if (!interval) return;
+    if (!settings.lastBackup || (Date.now() - settings.lastBackup) >= interval){
+      saveBackupSnapshot();
+      settings.lastBackup = Date.now();
+      saveSettings();
+    }
   }
 
   /* ---------- Notifications ---------- */
@@ -981,10 +1376,12 @@ button{cursor:pointer}
 
   function checkReminders(force){
     if (!("Notification" in window) || Notification.permission !== "granted") return;
+    var t = todayMid();
+    var days = settings.notifyDays || 3;
     var soon = payments.filter(function(p){
       if (p.status === "done") return false;
-      var diff = (parseISO(p.due) - TODAY_REF) / 86400000;
-      return diff <= 3;
+      var diff = (parseISO(p.due) - t) / 86400000;
+      return diff <= days;
     });
     if (!soon.length) return;
     var dayKey = "odeme-takip-notified";
@@ -993,11 +1390,14 @@ button{cursor:pointer}
     var stamp = new Date().toDateString();
     if (!force && last === stamp) return;
     try { localStorage.setItem(dayKey, stamp); } catch(e){}
+    var overdue = soon.filter(function(p){ return parseISO(p.due) < t; }).length;
+    var upcoming = soon.length - overdue;
+    var body = "";
+    if (overdue && upcoming) body = overdue + " gecikmiş, " + upcoming + " yaklaşan ödeme var.";
+    else if (overdue) body = overdue + " gecikmiş ödeme var.";
+    else body = upcoming + " ödeme " + days + " gün içinde vadeli.";
     try {
-      new Notification("Ödeme Takip", {
-        body: soon.length + " ödeme için vade yaklaşıyor veya gecikmiş.",
-        lang: "tr", tag: "odeme-takip"
-      });
+      new Notification("Ödeme Takip", { body: body, lang: "tr", tag: "odeme-takip" });
     } catch(e){}
   }
 
@@ -1047,8 +1447,6 @@ button{cursor:pointer}
 
   if ("serviceWorker" in navigator && location.protocol.indexOf("http") === 0){
     window.addEventListener("load", function(){
-      /*navigator.serviceWorker.register("./sw.js").catch(function(){}); */
-      
       navigator.serviceWorker.register("./sw.js", { scope: "./" });
     });
   }
@@ -1080,9 +1478,21 @@ button{cursor:pointer}
   })();
 
   /* ---------- Init ---------- */
-  load();
-  render();
-  checkReminders(false);
+  function startApp(){
+    if (appStarted) return;
+    appStarted = true;
+    load();
+    render();
+    checkReminders(false);
+    checkAutoBackup();
+  }
+
+  loadSettings();
+  if (pinSet()){
+    showLock("login");
+  } else {
+    showLock("setup");
+  }
 })();
 </script>
 </body>
