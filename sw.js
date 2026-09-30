@@ -1,4 +1,4 @@
-const CACHE = "odeme-takip-v3";
+const CACHE = "odeme-takip-v4";
 const ASSETS = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", (e) => {
@@ -67,6 +67,16 @@ self.addEventListener("fetch", (e) => {
                 })
             )
         );
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (e) => {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windows) => {
+      if (windows.length) return windows[0].focus();
+      return clients.openWindow("./");
     })
   );
 });

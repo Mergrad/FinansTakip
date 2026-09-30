@@ -251,20 +251,18 @@ button{cursor:pointer}
 .kv .k{font-size:12.5px;color:var(--muted);font-weight:550}
 .kv .v{font-size:13.5px;font-weight:750}
 
-/* Category chart (improved) */
-.cat-row{padding:11px 0;border-top:1px solid var(--stroke)}
-.cat-row:first-of-type{border-top:none}
-.cat-top{display:flex;align-items:center;gap:9px}
-.cat-top .dot{width:11px;height:11px;border-radius:3px;flex:0 0 auto}
-.cat-top .nm{font-size:13px;font-weight:650;flex:1 1 0;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.cat-top .vl{font-size:13px;font-weight:750}
-.cat-top .pc{font-size:11.5px;color:var(--muted);width:42px;text-align:right;font-weight:650}
-.cat-bar{height:7px;border-radius:999px;background:rgba(255,255,255,.06);margin-top:9px;overflow:hidden}
-.cat-bar span{display:block;height:100%;border-radius:999px;transition:width .5s cubic-bezier(.2,.8,.2,1)}
-.donut-wrap{display:grid;place-items:center;position:relative;padding:6px 0 4px}
-.donut-center{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
-.donut-center b{font-size:20px;font-weight:800;letter-spacing:-.6px;display:block}
-.donut-center span{font-size:10.5px;color:var(--muted);font-weight:600}
+/* Category chart: values stay readable on narrow mobile screens. */
+.category-chart{display:grid;gap:15px;padding-top:3px}
+.cat-row{display:grid;gap:8px}
+.cat-top{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px}
+.cat-name{display:flex;align-items:center;gap:9px;min-width:0}
+.cat-top .dot{width:10px;height:10px;border-radius:50%;flex:0 0 auto;box-shadow:0 0 0 4px color-mix(in srgb,var(--cat-color) 13%,transparent)}
+.cat-top .nm{font-size:13px;font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cat-value{display:flex;align-items:baseline;justify-content:flex-end;gap:7px;white-space:nowrap}
+.cat-top .vl{font-size:13.5px;font-weight:800;letter-spacing:-.25px}
+.cat-top .pc{font-size:11px;color:var(--muted);font-weight:650}
+.cat-bar{height:9px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.cat-bar span{display:block;height:100%;border-radius:999px;transition:width .5s cubic-bezier(.2,.8,.2,1);box-shadow:0 0 14px color-mix(in srgb,var(--cat-color) 55%,transparent)}
 
 .ratio{display:flex;gap:16px;margin-top:12px;flex-wrap:wrap}
 .ratio b{display:block;font-size:13px;font-weight:750;margin-top:3px}
@@ -282,7 +280,7 @@ button{cursor:pointer}
 .ycol.active .yfill{opacity:1;box-shadow:0 0 14px rgba(99,102,241,.8)}
 .ym{font-size:10px;color:var(--muted);font-weight:600}
 .ycol.active .ym{color:#c7c9ff}
-.yval{font-size:9.5px;color:var(--faint);font-weight:650;min-height:12px}
+.yval{font-size:9.5px;color:var(--faint);font-weight:700;min-height:12px;white-space:nowrap;letter-spacing:-.25px}
 .ycol.active .yval{color:var(--text)}
 
 /* Settings */
@@ -548,6 +546,12 @@ button{cursor:pointer}
   function byId(id){ for (var i=0;i<payments.length;i++){ if (payments[i].id===id) return payments[i]; } return null; }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
   function tl(n){ return "₺" + Number(n).toLocaleString("tr-TR"); }
+  function compactTL(n){
+    n = Number(n) || 0;
+    if (n < 1000) return "₺" + n;
+    if (n < 1000000) return "₺" + (n / 1000).toLocaleString("tr-TR", { maximumFractionDigits: n < 10000 ? 1 : 0 }) + " B";
+    return "₺" + (n / 1000000).toLocaleString("tr-TR", { maximumFractionDigits: 1 }) + " Mn";
+  }
   function pad(n){ return n<10 ? "0"+n : ""+n; }
   function parseISO(s){ var a=s.split("-"); return new Date(+a[0], +a[1]-1, +a[2]); }
   function dayLabel(s){ var d=parseISO(s); return d.getDate() + " " + MONTHS[d.getMonth()] + " " + d.getFullYear(); }
@@ -813,38 +817,28 @@ button{cursor:pointer}
       return { k:k, label:CATS[k].label, color:CATS[k].color, value:sum(inMonth, function(p){ return p.cat===k ? p.amount : 0; }) };
     }).filter(function(r){ return r.value > 0; }).sort(function(a,b){ return b.value - a.value; });
     var top = rows[0];
-    var C = 2 * Math.PI * 60;
-    var acc = 0;
-    var segs = "";
-    rows.forEach(function(r){
-      var len = total ? C * (r.value/total) : 0;
-      var gap = 3;
-      var drawLen = Math.max(0, len - gap);
-      segs += '<circle cx="90" cy="90" r="60" fill="none" stroke="' + r.color + '" stroke-width="20" stroke-dasharray="' + drawLen.toFixed(2) + " " + (C-drawLen).toFixed(2) + '" stroke-dashoffset="' + (-acc).toFixed(2) + '"/>';
-      acc += len;
-    });
 
     var html = '<div class="page">'
-      + '<div class="sec-head" style="margin-top:4px"><h2>Özet · ' + MONTHS[month] + " " + year + '</h2><span class="count">' + tl(total) + '</span></div>'
+      + '<div class="monthbar" id="monthbar">'
+      + '<button class="m-btn" id="prevMonth" type="button" aria-label="Önceki ay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg></button>'
+      + '<div class="m-label"><b>' + MONTHS[month] + " " + year + '</b><span id="todayLabel"></span></div>'
+      + '<button class="m-btn" id="nextMonth" type="button" aria-label="Sonraki ay"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg></button>'
+      + '</div>'
+      + '<div class="swipe-hint">← Ay değiştirmek için kaydır →</div>'
+      + '<div class="sec-head" style="margin-top:20px"><h2>Özet</h2><span class="count">' + tl(total) + '</span></div>'
       + '<div class="card"><h3>Kategori Dağılımı</h3>'
-      + '<div class="donut-wrap">'
-      + '<svg width="180" height="180" viewBox="0 0 180 180" style="transform:rotate(-90deg)" aria-hidden="true">'
-      + '<circle cx="90" cy="90" r="60" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="20"/>' + segs
-      + '</svg>'
-      + '<div class="donut-center"><b class="od-nowrap">' + tl(total) + '</b><span>' + inMonth.length + ' ödeme</span></div>'
-      + '</div>';
+      + '<div class="category-chart">';
     if (!rows.length){
       html += '<p class="hint" style="text-align:center">Bu ay için kayıt yok.</p>';
     }
     rows.forEach(function(r){
       var p = total ? Math.round(r.value/total*100) : 0;
-      html += '<div class="cat-row"><div class="cat-top"><i class="dot" style="background:' + r.color + '"></i>'
-        + '<span class="nm">' + esc(r.label) + '</span>'
-        + '<span class="vl od-nowrap">' + tl(r.value) + '</span>'
-        + '<span class="pc">' + p + '%</span></div>'
+      html += '<div class="cat-row" style="--cat-color:' + r.color + '"><div class="cat-top"><div class="cat-name"><i class="dot" style="background:' + r.color + '"></i>'
+        + '<span class="nm">' + esc(r.label) + '</span></div>'
+        + '<div class="cat-value"><span class="vl">' + tl(r.value) + '</span><span class="pc">' + p + '%</span></div></div>'
         + '<div class="cat-bar"><span style="width:' + p + '%;background:' + r.color + '"></span></div></div>';
     });
-    html += '</div>';
+    html += '</div></div>';
 
     html += '<div class="card"><h3>Ödenen / Bekleyen</h3>'
       + '<div class="bar-track">'
@@ -881,6 +875,11 @@ button{cursor:pointer}
     var max = Math.max.apply(null, data.map(function(d){ return d.total; }).concat([1]));
     var yTotal = sum(data, function(d){ return d.total; });
     var best = data.slice().sort(function(a,b){ return b.total-a.total; })[0];
+    var yearRows = CAT_ORDER.map(function(k){
+      return { k:k, label:CATS[k].label, color:CATS[k].color, value:sum(payments, function(p){
+        return parseISO(p.due).getFullYear()===year && p.cat===k ? p.amount : 0;
+      }) };
+    }).filter(function(r){ return r.value > 0; }).sort(function(a,b){ return b.value-a.value; });
 
     var html = '<div class="page">'
       + '<div class="sec-head" style="margin-top:4px"><h2>Yıllık · ' + year + '</h2><span class="count od-nowrap">' + tl(yTotal) + '</span></div>'
@@ -888,10 +887,23 @@ button{cursor:pointer}
     data.forEach(function(d){
       var h = d.total ? Math.max(6, Math.round(d.total/max*100)) : 3;
       html += '<button class="ycol' + (d.i===month ? " active" : "") + '" data-month="' + d.i + '" type="button" aria-label="' + MONTHS[d.i] + ' ' + year + '">'
-        + '<span class="yval">' + (d.total ? Math.round(d.total/1000) + "b" : "") + '</span>'
+        + '<span class="yval" title="' + tl(d.total) + '">' + (d.total ? compactTL(d.total) : "") + '</span>'
         + '<span class="ytrack"><span class="yfill" style="height:' + h + '%"></span></span>'
         + '<span class="ym">' + MONTHS_SHORT[d.i] + '</span>'
         + '</button>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="card"><h3>Kategori Dağılımı · ' + year + '</h3><div class="category-chart">';
+    if (!yearRows.length){
+      html += '<p class="hint" style="text-align:center">Bu yıl için kayıt yok.</p>';
+    }
+    yearRows.forEach(function(r){
+      var p = yTotal ? Math.round(r.value/yTotal*100) : 0;
+      html += '<div class="cat-row" style="--cat-color:' + r.color + '"><div class="cat-top"><div class="cat-name"><i class="dot" style="background:' + r.color + '"></i>'
+        + '<span class="nm">' + esc(r.label) + '</span></div>'
+        + '<div class="cat-value"><span class="vl">' + tl(r.value) + '</span><span class="pc">' + p + '%</span></div></div>'
+        + '<div class="cat-bar"><span style="width:' + p + '%;background:' + r.color + '"></span></div></div>';
     });
     html += '</div></div>';
 
@@ -935,7 +947,7 @@ button{cursor:pointer}
 
     /* Notifications */
     html += '<div class="card"><h3>Bildirimler</h3>'
-      + '<div class="set-row"><div class="txt"><b>Vade hatırlatması</b><span>Yaklaşan ve gecikmiş ödemeler için bildirim gönderir.</span></div>'
+      + '<div class="set-row"><div class="txt"><b>Vade hatırlatması</b><span>Yaklaşan ve gecikmiş ödemeleri uygulama açıldığında ve kullanırken kontrol eder.</span></div>'
       + (notifOk ? '<span class="pill-ok">Açık</span>' : '<button class="btn primary" id="notifBtn" type="button">İzni Aç</button>')
       + '</div>'
       + '<div class="set-col"><span class="lbl">Kaç gün önce uyarılsın?</span><div class="seg-set">'
@@ -944,6 +956,7 @@ button{cursor:pointer}
       + '<label><input type="radio" name="ndays" value="7"' + (notifyDays===7?" checked":"") + ' /> 7 gün</label>'
       + '</div></div>'
       + '<div class="kv"><span class="k">İzin durumu</span><span class="v">' + notifPermissionLabel() + '</span></div>'
+      + '<p class="hint">Telefonunda daha güvenilir uyarı için uygulamayı ana ekrana yükle ve bildirim iznini açık tut.</p>'
       + '</div>';
 
     /* Backup */
@@ -1008,7 +1021,7 @@ button{cursor:pointer}
     fab.hidden = tab !== "pay";
     bell.setAttribute("data-empty", payments.some(function(p){ return p.status!=="done"; }) ? "0" : "1");
 
-    if (tab === "pay") attachMonthSwipe();
+    if (tab === "pay" || tab === "sum") attachMonthSwipe();
   }
 
   function attachMonthSwipe(){
@@ -1396,9 +1409,24 @@ button{cursor:pointer}
     if (overdue && upcoming) body = overdue + " gecikmiş, " + upcoming + " yaklaşan ödeme var.";
     else if (overdue) body = overdue + " gecikmiş ödeme var.";
     else body = upcoming + " ödeme " + days + " gün içinde vadeli.";
-    try {
-      new Notification("Ödeme Takip", { body: body, lang: "tr", tag: "odeme-takip" });
-    } catch(e){}
+    showReminderNotification(body);
+  }
+
+  function showReminderNotification(body){
+    var options = { body:body, lang:"tr", tag:"odeme-takip", renotify:true };
+    if (navigator.serviceWorker && navigator.serviceWorker.ready){
+      navigator.serviceWorker.ready.then(function(reg){ return reg.showNotification("Ödeme Takip", options); }).catch(function(){
+        try { new Notification("Ödeme Takip", options); } catch(e){}
+      });
+    } else {
+      try { new Notification("Ödeme Takip", options); } catch(e){}
+    }
+  }
+
+  function scheduleReminderCheck(){
+    checkReminders(false);
+    clearInterval(scheduleReminderCheck.timer);
+    scheduleReminderCheck.timer = setInterval(function(){ checkReminders(false); }, 15 * 60 * 1000);
   }
 
   /* ---------- PWA ---------- */
@@ -1450,6 +1478,8 @@ button{cursor:pointer}
       navigator.serviceWorker.register("./sw.js", { scope: "./" });
     });
   }
+  window.addEventListener("focus", function(){ if (appStarted) checkReminders(false); });
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden && appStarted) checkReminders(false); });
 
   /* ---------- Runtime-generated apple touch icon ---------- */
   (function touchIcon(){
@@ -1483,7 +1513,7 @@ button{cursor:pointer}
     appStarted = true;
     load();
     render();
-    checkReminders(false);
+    scheduleReminderCheck();
     checkAutoBackup();
   }
 
