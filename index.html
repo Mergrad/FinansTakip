@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Ödeme Takip · 2026 Mobil Finansal Asistan</title>
-<meta name="description" content="Kira, fatura, kredi kartı, abonelik ve sigorta ödemelerini takip eden çevrimdışı PWA." />
+<title>Ödeme Takip · Mobil Finans Asistanı</title>
+<meta name="description" content="Excel kaynaklı 283 tarihsel ödeme kaydını ve kişisel ödeme takibini yöneten çevrimdışı PWA." />
 <meta name="theme-color" content="#070b16" />
 <meta name="color-scheme" content="dark" />
 <meta name="mobile-web-app-capable" content="yes" />
@@ -97,6 +97,18 @@ button{cursor:pointer}
 .brand h1{font-size:15px;margin:0;font-weight:700;letter-spacing:-.2px}
 .brand p{margin:2px 0 0;font-size:11px;color:var(--muted);font-weight:500}
 .top-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.fx-rate{
+  display:flex;align-items:center;gap:6px;min-height:44px;padding:0 11px;
+  border-radius:14px;border:1px solid var(--stroke);background:var(--surface);
+  color:var(--text);backdrop-filter:blur(14px);white-space:nowrap;
+  box-shadow:0 8px 20px -14px rgba(34,211,238,.65);
+}
+.fx-rate .fx-symbol{font-size:11px;font-weight:800;color:#c7c9ff;letter-spacing:.2px}
+.fx-rate .fx-value{font-size:12px;font-weight:750;letter-spacing:-.2px}
+.fx-rate .fx-unit{font-size:9.5px;color:var(--muted);font-weight:650}
+.fx-rate.loading .fx-value{color:var(--muted)}
+.fx-rate.error .fx-value{color:var(--amber)}
+
 .icon-btn{width:44px;height:44px;border-radius:14px;border:1px solid var(--stroke);background:var(--surface);
   display:grid;place-items:center;color:var(--text);backdrop-filter:blur(14px);transition:transform .18s ease,background .18s ease}
 .icon-btn svg{width:19px;height:19px}
@@ -233,7 +245,7 @@ button{cursor:pointer}
   background:linear-gradient(180deg,rgba(7,11,22,.6),rgba(7,11,22,.96) 45%);backdrop-filter:blur(22px);
   border-top:1px solid var(--stroke)}
 .nav-item{border:none;background:transparent;color:var(--faint);display:flex;flex-direction:column;align-items:center;
-  justify-content:center;gap:5px;font-size:10px;font-weight:650;min-height:48px;min-width:44px;padding:6px 8px;
+  justify-content:center;gap:4px;font-size:9px;font-weight:650;min-height:48px;min-width:44px;padding:6px 8px;
   border-radius:14px;transition:color .2s ease,transform .16s ease;flex:1 1 0}
 .nav-item svg{width:22px;height:22px}
 .nav-item.active{color:#c7c9ff}
@@ -397,7 +409,87 @@ button{cursor:pointer}
 .toast.on{opacity:1;visibility:visible;transform:translate(-50%,0)}
 
 @media (prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+  *:not(.fx-rate),*:not(.fx-rate)::before,*:not(.fx-rate)::after{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
+
+  .theme-toggle{width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:14px;border:1px solid var(--stroke);background:var(--surface);color:var(--text);cursor:pointer;font-size:17px;box-shadow:0 8px 20px -14px rgba(34,211,238,.65);transition:transform .15s ease,border-color .15s ease,background .15s ease;backdrop-filter:blur(14px)}
+  .theme-toggle:hover{border-color:rgba(34,211,238,.45);background:rgba(255,255,255,.08)}
+  .theme-toggle:active{transform:scale(.94)}
+  .theme-toggle:focus-visible{outline:2px solid rgba(34,211,238,.65);outline-offset:2px}
+  .fx-refresh{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:16px;height:16px;color:var(--muted);opacity:.75;
+  }
+  .fx-refresh svg{
+    width:16px;height:16px;display:block;fill:none;
+    stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;
+    transform-origin:50% 50%;
+  }
+  .fx-rate:hover .fx-refresh{color:var(--cyan);opacity:1}
+  .fx-rate.updating .fx-refresh{color:var(--cyan);opacity:1}
+  .fx-rate.updating .fx-refresh svg{animation:fxSpin .65s linear infinite}
+  .fx-rate.updated{animation:fxPulse .7s ease}
+  .fx-rate.updated .fx-refresh{color:var(--green);opacity:1}
+  .fx-rate.updated::after{
+    content:"";position:absolute;inset:0;border-radius:inherit;
+    background:rgba(34,211,238,.10);animation:fxFlash .8s ease forwards;
+    pointer-events:none;
+  }
+  @keyframes fxSpin{
+    from{transform:rotate(0deg)}
+    to{transform:rotate(360deg)}
+  }
+  body.light-theme{--bg:#f4f7fb;--surface:rgba(255,255,255,.88);--surface2:rgba(248,250,252,.96);--stroke:rgba(15,23,42,.10);--text:#172033;--muted:#667085;--cyan:#0891b2;--purple:#6d5dfc;--green:#15803d;--red:#dc2626;--amber:#b45309;background:radial-gradient(900px 500px at 10% -10%,rgba(109,93,252,.10),transparent 60%),radial-gradient(800px 500px at 100% 0%,rgba(8,145,178,.08),transparent 60%),var(--bg)}
+  body.light-theme .topbar,body.light-theme .card,body.light-theme .modal,body.light-theme .sheet,body.light-theme .toast,body.light-theme .fx-rate,body.light-theme .theme-toggle{box-shadow:0 10px 30px rgba(15,23,42,.07)}
+  body.light-theme .nav{background:rgba(255,255,255,.86);border-top-color:var(--stroke)}
+  body.light-theme input,body.light-theme select,body.light-theme textarea{background:rgba(255,255,255,.9);color:var(--text);border-color:var(--stroke)}
+  body.light-theme .theme-toggle:hover,body.light-theme .fx-rate:hover{background:rgba(15,23,42,.04)}
+
+
+  @keyframes fxPulse{0%{transform:scale(1)}45%{transform:scale(1.045)}100%{transform:scale(1)}}
+  @keyframes fxFlash{0%{opacity:1}100%{opacity:0}}
+
+
+/* ---------- Kur butonu: dönen ışık çerçevesi (buton_1.html tarzı) ---------- */
+.fx-rate{
+  --fx-inner:#0f1426;
+  position:relative; overflow:hidden; isolation:isolate; min-height:44px;
+  border:1px solid var(--stroke); border-radius:12px;
+  background:var(--surface); color:var(--text); cursor:pointer; box-shadow:none;
+}
+body.light-theme .fx-rate{--fx-inner:#ffffff}
+.fx-rate > *{position:relative;z-index:2}
+
+/* Dönen ışık katmanı: sadece yükleme sırasında görünür */
+.fx-rate::before{
+  content:""; position:absolute; top:50%; left:50%;
+  width:240px; height:240px;
+  background:conic-gradient(from 0deg,transparent 20%,#3b82f6,#8b5cf6,#ec4899,transparent 80%);
+  transform:translate(-50%,-50%) rotate(0deg);
+  opacity:0; pointer-events:none; z-index:0;
+}
+/* İç gövde: ışığı sadece kenarda (2px) bırakır */
+.fx-rate::after{
+  content:""; position:absolute; inset:2px; border-radius:9px;
+  background:var(--fx-inner); z-index:1;
+  opacity:0; pointer-events:none;
+}
+.fx-rate{-webkit-mask-image:-webkit-radial-gradient(white,black);transform:translateZ(0)}
+.fx-rate::before{will-change:transform}
+.fx-rate.loading::before{opacity:1; animation:fxBorderRotate 1.5s linear infinite}
+.fx-rate.loading::after{opacity:1}
+
+/* Tamamlandı: yeşil ışık bir tur döner, çerçeve yeşil parlar */
+.fx-rate.success{border-color:rgba(52,211,153,.75);box-shadow:0 0 18px rgba(52,211,153,.28)}
+.fx-rate.success::before{
+  opacity:1;
+  background:conic-gradient(from 0deg,transparent 20%,#22c55e,#86efac,transparent 80%);
+  animation:fxBorderRotate .8s linear 1;
+}
+.fx-rate.success::after{opacity:1}
+@keyframes fxBorderRotate{
+  from{transform:translate(-50%,-50%) rotate(0deg)}
+  to{transform:translate(-50%,-50%) rotate(360deg)}
 }
 </style>
 </head>
@@ -412,10 +504,16 @@ button{cursor:pointer}
       </div>
       <div>
         <h1>Ödeme Takip</h1>
-        <p>2026 Mobil Finansal Asistan</p>
+        <p>Mobil Finans Asistanı</p>
       </div>
     </div>
     <div class="top-actions">
+      <button class="theme-toggle" id="themeToggle" type="button" title="Açık temaya geç" aria-label="Tema değiştir"><span id="themeIcon">☀️</span></button>
+  <button class="fx-rate" id="fxRate" type="button" title="USDT/TRY kurunu güncelle" aria-label="USDT TRY kurunu güncelle">
+      <span class="fx-symbol">₮</span>
+      <span class="fx-value" id="fxValue">—</span>
+      <span class="fx-unit">TRY</span>
+    </button>
       <button class="install-btn" id="installBtn" type="button" aria-label="Uygulamayı yükle">
         <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
         Yükle
@@ -445,6 +543,10 @@ button{cursor:pointer}
   <button class="nav-item" data-tab="year" role="tab" aria-selected="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M3 9h18M8 2v4M16 2v4"/></svg>
     Yıllık
+  </button>
+  <button class="nav-item" data-tab="all" role="tab" aria-selected="false">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19V5"/><path d="M4 19h16"/><path d="M8 15l3-4 3 2 4-6"/></svg>
+    Tüm Zamanlar
   </button>
   <button class="nav-item" data-tab="set" role="tab" aria-selected="false">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>
@@ -497,6 +599,7 @@ button{cursor:pointer}
   </div>
 </div>
 
+<script src="./payments.js"></script>
 <script>
 (function(){
   "use strict";
@@ -507,7 +610,7 @@ button{cursor:pointer}
   var BACKUP_DB = "odeme-takip-backups";
   var BACKUP_STORE = "snapshots";
   var MAX_BACKUPS = 5;
-  var VERSION = "2.0.0";
+  var VERSION = "2.3.0";
   var MONTHS = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
   var MONTHS_SHORT = ["Oca","Şub","Mar","Nis","May","Haz","Tem","Ağu","Eyl","Eki","Kas","Ara"];
 
@@ -516,25 +619,12 @@ button{cursor:pointer}
     fatura:    { label:"Fatura",      color:"#22d3ee", icon:'<path d="M6 2h9l4 4v16l-3-2-3 2-3-2-3 2V2Z"/><path d="M9 8h6M9 12h6M9 16h3"/>' },
     kart:      { label:"Kredi Kartı", color:"#f472b6", icon:'<rect x="2" y="5" width="20" height="14" rx="3"/><path d="M2 10h20"/><path d="M6 15h4"/>' },
     abonelik:  { label:"Abonelik",    color:"#34d399", icon:'<path d="M4 4h16v16H4z"/><path d="M4 9h16M8 13h4"/>' },
-    sigorta:   { label:"Sigorta",     color:"#fbbf24", icon:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6Z"/><path d="m9 12 2 2 4-4"/>' }
+    sigorta:   { label:"Sigorta",     color:"#fbbf24", icon:'<path d="M12 3 20 6v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6Z"/><path d="m9 12 2 2 4-4"/>' },
+    diger:     { label:"Kategorisiz", color:"#94a3b8", icon:'<circle cx="12" cy="12" r="9"/><path d="M8 12h8M12 8v8"/>' }
   };
   var STATUS = { done:{ t:"Ödendi", c:"ok" }, wait:{ t:"Bekliyor", c:"wait" }, late:{ t:"Gecikmiş", c:"late" } };
-  var CAT_ORDER = ["kira","fatura","kart","abonelik","sigorta"];
+  var CAT_ORDER = ["kira","fatura","kart","abonelik","sigorta","diger"];
 
-  function seed(){
-    return [
-      { id:1,  cat:"kira",     amount:22000, due:"2026-03-05", status:"done", note:"Mart 2026 ev kirası transfer edildi", repeat:"once" },
-      { id:2,  cat:"fatura",   amount:890,   due:"2026-03-14", status:"done", note:"Elektrik faturası ödendi", repeat:"once" },
-      { id:3,  cat:"fatura",   amount:2150,  due:"2026-03-18", status:"wait", note:"Son ödeme günü yaklaşıyor", repeat:"once" },
-      { id:4,  cat:"fatura",   amount:420,   due:"2026-03-20", status:"wait", note:"Su faturası · sayaç okundu", repeat:"once" },
-      { id:5,  cat:"fatura",   amount:550,   due:"2026-03-08", status:"late", note:"Vadesi geçti! Acil ödeme bekliyor", repeat:"once" },
-      { id:6,  cat:"kart",     amount:14800, due:"2026-03-24", status:"wait", note:"Hesap kesim yapıldı", repeat:"once" },
-      { id:7,  cat:"abonelik", amount:490,   due:"2026-03-10", status:"done", note:"Netflix, Spotify, iCloud", repeat:"monthly" },
-      { id:8,  cat:"sigorta",  amount:2500,  due:"2026-03-28", status:"wait", note:"3. taksit", repeat:"once" },
-      { id:9,  cat:"kira",     amount:800,   due:"2026-03-12", status:"done", note:"Yöneticiye havale", repeat:"once" },
-      { id:10, cat:"sigorta",  amount:3800,  due:"2026-03-06", status:"late", note:"Gecikmede! Poliçe iptal riski", repeat:"once" }
-    ];
-  }
 
   var payments = [];
   var _now = new Date();
@@ -545,7 +635,7 @@ button{cursor:pointer}
   /* ---------- Helpers ---------- */
   function byId(id){ for (var i=0;i<payments.length;i++){ if (payments[i].id===id) return payments[i]; } return null; }
   function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
-  function tl(n){ return "₺" + Number(n).toLocaleString("tr-TR"); }
+  function tl(n){ return "₺" + Number(n).toLocaleString("tr-TR", { minimumFractionDigits:Number(n)%1 ? 2 : 0, maximumFractionDigits:2 }); }
   function compactTL(n){
     n = Number(n) || 0;
     if (n < 1000) return "₺" + n;
@@ -570,21 +660,176 @@ button{cursor:pointer}
   function load(){
     var raw = null, seeded = false;
     try { raw = localStorage.getItem(KEY); } catch(e){}
+
     if (raw){
       try {
         var data = JSON.parse(raw);
-        if (data && Array.isArray(data.payments)){ payments = data.payments; seeded = !!data.seeded; }
+        if (data && Array.isArray(data.payments)){
+          payments = data.payments;
+          seeded = !!data.seeded;
+        }
       } catch(e){ payments = []; }
     }
-    if (!payments.length && !seeded){ payments = seed(); save(); }
+
+    var migrated = false;
+    try { migrated = localStorage.getItem("odeme-takip-history-v3") === "1"; } catch(e){}
+
+    if (!migrated){
+      return mergeHistoricalData().then(function(){
+        applyOverdue();
+      }).catch(function(){
+        payments = [];
+        applyOverdue();
+        toast("Başlangıç verileri yüklenemedi. payments.js dosyasını kontrol edin.");
+      });
+    }
+
+    if (!payments.length && !seeded){
+      return mergeHistoricalData().then(function(){
+        applyOverdue();
+      }).catch(function(){
+        payments = [];
+        applyOverdue();
+        toast("Başlangıç verileri yüklenemedi. payments.js dosyasını kontrol edin.");
+      });
+    }
+
     applyOverdue();
+    return Promise.resolve();
   }
+  /* ---------- Harici başlangıç verileri ---------- */
+  function loadInitialPaymentsFromData(){
+    var data = window.ODemeTakipInitialData;
+    if (!Array.isArray(data)) throw new Error("payments.js başlangıç verileri bulunamadı");
+    return data.map(function(p){
+      return {
+        id: Number(p.id),
+        cat: p.cat || "diger",
+        amount: Number(p.amount) || 0,
+        due: p.due || "",
+        note: p.note || "",
+        status: p.status || "wait",
+        repeat: p.repeat || "once"
+      };
+    });
+  }
+
+  function paymentKey(p){
+    return [p.cat || "diger", Number(p.amount).toFixed(6), p.due || "", String(p.note || "").trim().toLocaleLowerCase("tr-TR")].join("|");
+  }
+
+  function mergeHistoricalData(){
+    try{
+      var imported = loadInitialPaymentsFromData();
+      payments = imported.map(function(p){
+        return {
+          id: p.id,
+          cat: p.cat,
+          amount: Number(p.amount),
+          due: p.due,
+          note: p.note,
+          status: p.status,
+          repeat: p.repeat
+        };
+      });
+
+      try {
+        localStorage.setItem("odeme-takip-history-v3", "1");
+        localStorage.setItem("odeme-takip-history-count", String(payments.length));
+      } catch(e){}
+
+      save();
+      return Promise.resolve();
+    }catch(e){
+      return Promise.reject(e);
+    }
+  }
+
   function applyOverdue(){
     var t = todayMid(), changed = false;
     payments.forEach(function(p){
       if (p.status==="wait" && parseISO(p.due) < t){ p.status = "late"; changed = true; }
     });
     if (changed) save();
+  }
+
+
+  /* ---------- Binance USDT/TRY kuru ---------- */
+  var fxUpdating = false;
+  var fxRequestSeq = 0;
+  var FX_ENDPOINT = "https://data-api.binance.vision/api/v3/ticker/price?symbol=USDTTRY";
+
+  function renderFX(value, state){
+    var box = document.getElementById("fxRate");
+    var val = document.getElementById("fxValue");
+    if (!box || !val) return;
+    box.classList.remove("loading","success");
+    if (state === "loading"){
+      box.classList.add("loading");
+      val.textContent = "—";
+      return;
+    }
+    if (typeof value === "number" && isFinite(value)){
+      val.textContent = value.toLocaleString("tr-TR", {
+        minimumFractionDigits:2,
+        maximumFractionDigits:6
+      });
+      return;
+    }
+    val.textContent = "—";
+  }
+
+  function fetchUSDTRY(){
+    if (fxUpdating) return;
+    fxUpdating = true;
+    var seq = ++fxRequestSeq;
+    var box = document.getElementById("fxRate");
+    var val = document.getElementById("fxValue");
+    if (!box || !val){ fxUpdating=false; return; }
+
+    renderFX(null, "loading");
+    var started = performance.now();
+    var minDuration = 3000;
+    var rate = null;
+    var failed = false;
+
+    fetch(FX_ENDPOINT, {
+      cache:"no-store",
+      headers:{ "Accept":"application/json" }
+    })
+    .then(function(r){
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function(data){
+      if (!data || data.symbol !== "USDTTRY" || !data.price) throw new Error("USDTTRY fiyatı bulunamadı");
+      rate = Number(data.price);
+      if (!isFinite(rate)) throw new Error("Geçersiz fiyat");
+    })
+    .catch(function(){
+      failed = true;
+    })
+    .finally(function(){
+      var wait = Math.max(0, minDuration - (performance.now() - started));
+      setTimeout(function(){
+        if (seq !== fxRequestSeq) return;
+        fxUpdating = false;
+        box.classList.remove("loading");
+        if (!failed && rate !== null){
+          val.textContent = rate.toLocaleString("tr-TR", {
+            minimumFractionDigits:2,
+            maximumFractionDigits:6
+          });
+          box.classList.add("success");
+          setTimeout(function(){
+            if (seq === fxRequestSeq) box.classList.remove("success");
+          }, 1200);
+        } else {
+          val.textContent = "—";
+          if (typeof toast === "function") toast("Binance USDT/TRY kuru alınamadı");
+        }
+      }, wait);
+    });
   }
 
   /* ---------- PIN ---------- */
@@ -732,7 +977,7 @@ button{cursor:pointer}
     var pct = total ? Math.round(paid/total*100) : 0;
     var upcoming = inMonth.filter(function(p){ return p.status!=="done"; });
 
-    var shown = inMonth.filter(function(p){ return filter==="all" ? p.status!=="done" : p.status===filter; });
+    var shown = inMonth.filter(function(p){ return filter==="all" ? true : p.status===filter; });
     shown.sort(function(a,b){
       var la = a.status==="late"?0:1, lb = b.status==="late"?0:1;
       if (la!==lb) return la-lb;
@@ -923,6 +1168,73 @@ button{cursor:pointer}
     return { "granted":"Açık", "denied":"Reddedildi", "default":"Kapalı" }[Notification.permission] || "Kapalı";
   }
 
+  function viewAllTime(){
+    var rows = payments.slice().sort(function(a,b){ return parseISO(a.due)-parseISO(b.due); });
+    var total = sum(rows);
+    var paid = sum(rows, function(p){ return p.status==="done" ? p.amount : 0; });
+    var waiting = sum(rows, function(p){ return p.status==="wait" ? p.amount : 0; });
+    var late = sum(rows, function(p){ return p.status==="late" ? p.amount : 0; });
+
+    var html = '<div class="page">'
+      + '<div class="sec-head" style="margin-top:4px"><h2>Tüm Zamanlar</h2><span class="count">' + rows.length + ' kayıt</span></div>';
+
+    html += '<div class="card">'
+      + '<h3>Genel Toplam</h3>'
+      + '<div class="kv"><span class="k">Toplam gider</span><span class="v od-nowrap">' + tl(total) + '</span></div>'
+      + '<div class="kv"><span class="k">Toplam ödenen</span><span class="v od-nowrap" style="color:var(--green)">' + tl(paid) + '</span></div>'
+      + '<div class="kv"><span class="k">Toplam bekleyen</span><span class="v od-nowrap" style="color:var(--amber)">' + tl(waiting) + '</span></div>'
+      + '<div class="kv"><span class="k">Toplam gecikmiş</span><span class="v od-nowrap" style="color:var(--rose)">' + tl(late) + '</span></div>'
+      + '<div class="kv"><span class="k">Toplam kayıt</span><span class="v">' + rows.length + '</span></div>'
+      + '</div>';
+
+    var cats = CAT_ORDER.map(function(k){
+      return {
+        k:k,
+        label:CATS[k].label,
+        color:CATS[k].color,
+        value:sum(rows, function(p){ return p.cat===k ? p.amount : 0; }),
+        count:rows.filter(function(p){ return p.cat===k; }).length
+      };
+    }).filter(function(r){ return r.value > 0; }).sort(function(a,b){ return b.value-a.value; });
+
+    html += '<div class="card"><h3>Kategori Toplamları</h3><div class="category-chart">';
+    cats.forEach(function(r){
+      var pct = total ? Math.round(r.value/total*100) : 0;
+      html += '<div class="cat-row" style="--cat-color:' + r.color + '">'
+        + '<div class="cat-top"><div class="cat-name"><i class="dot" style="background:' + r.color + '"></i>'
+        + '<span class="nm">' + esc(r.label) + '</span></div>'
+        + '<div class="cat-value"><span class="vl">' + tl(r.value) + '</span><span class="pc">' + r.count + ' kayıt · ' + pct + '%</span></div></div>'
+        + '<div class="cat-bar"><span style="width:' + pct + '%;background:' + r.color + '"></span></div></div>';
+    });
+    html += '</div></div>';
+
+    var years = {};
+    rows.forEach(function(p){
+      var d = parseISO(p.due), y = d.getFullYear(), m = d.getMonth();
+      if (!years[y]) years[y] = {total:0,count:0,months:Array.from({length:12},function(){return {total:0,count:0};})};
+      years[y].total += Number(p.amount)||0;
+      years[y].count++;
+      years[y].months[m].total += Number(p.amount)||0;
+      years[y].months[m].count++;
+    });
+
+    var yearKeys = Object.keys(years).map(Number).sort(function(a,b){ return b-a; });
+    yearKeys.forEach(function(y){
+      var yr = years[y];
+      html += '<div class="card"><h3>' + y + ' <span style="float:right;color:var(--text)">' + tl(yr.total) + '</span></h3>';
+      yr.months.forEach(function(m,i){
+        if (!m.count) return;
+        html += '<div class="kv"><span class="k">' + MONTHS[i] + ' · ' + m.count + ' kayıt</span>'
+          + '<span class="v od-nowrap">' + tl(m.total) + '</span></div>';
+      });
+      html += '<div class="kv"><span class="k">Yıl toplamı</span><span class="v od-nowrap">' + tl(yr.total) + '</span></div>';
+      html += '</div>';
+    });
+
+    html += '<p class="hint">Tüm toplamlar uygulamadaki gerçek ödeme kayıtlarından dinamik olarak hesaplanır.</p></div>';
+    return html;
+  }
+
   function viewSettings(){
     var notifOk = ("Notification" in window) && Notification.permission === "granted";
     var hasPin = pinSet();
@@ -1008,6 +1320,7 @@ button{cursor:pointer}
     if (tab==="pay") view.innerHTML = viewPayments();
     else if (tab==="sum") view.innerHTML = viewSummary();
     else if (tab==="year") view.innerHTML = viewYear();
+    else if (tab==="all") view.innerHTML = viewAllTime();
     else view.innerHTML = viewSettings();
 
     var tl2 = document.getElementById("todayLabel");
@@ -1508,14 +1821,48 @@ button{cursor:pointer}
   })();
 
   /* ---------- Init ---------- */
+
+  function applyTheme(theme){
+    var light = theme === "light";
+    document.body.classList.toggle("light-theme", light);
+    var icon = document.getElementById("themeIcon");
+    var btn = document.getElementById("themeToggle");
+    if (icon) icon.textContent = light ? "🌙" : "☀️";
+    if (btn){
+      btn.title = light ? "Koyu temaya geç" : "Açık temaya geç";
+      btn.setAttribute("aria-label", light ? "Koyu temaya geç" : "Açık temaya geç");
+    }
+  }
+
+  function setupTheme(){
+    var saved = "dark";
+    try{ saved = localStorage.getItem("odeme-takip-theme") || "dark"; }catch(e){}
+    applyTheme(saved);
+    var btn = document.getElementById("themeToggle");
+    if (btn){
+      btn.addEventListener("click", function(){
+        var next = document.body.classList.contains("light-theme") ? "dark" : "light";
+        applyTheme(next);
+        try{ localStorage.setItem("odeme-takip-theme", next); }catch(e){}
+      });
+    }
+  }
+
   function startApp(){
+    setupTheme();
     if (appStarted) return;
     appStarted = true;
-    load();
-    render();
-    scheduleReminderCheck();
-    checkAutoBackup();
+
+    load().then(function(){
+      render();
+      scheduleReminderCheck();
+      checkAutoBackup();
+      fetchUSDTRY();
+    });
   }
+
+  var fxBtn = document.getElementById("fxRate");
+  if (fxBtn) fxBtn.addEventListener("click", fetchUSDTRY);
 
   loadSettings();
   if (pinSet()){
